@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA — Executive Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090e;--bg2:#111118;--bg3:#1a1a24;--card:#14141c;
+  --bdr:#252530;--bdr2:#343445;
+  --txt1:#f0eff8;--txt2:#9896b0;--txt3:#55536a;
+  --cyera:#6c47ff;--cyera2:#4f2fe0;--glow:rgba(108,71,255,0.12);
+  --green:#10b981;--gbg:#052e1a;--gbdr:#064e2a;
+  --amber:#f59e0b;--abg:#2d1f00;--abdr:#4d3500;
+  --red:#ef4444;--rbg:#2d0a0a;--rbdr:#4d1212;
+  --purple:#8b5cf6;--pbg:#1e1040;--pbdr:#3b2070;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt1);font-size:13px;line-height:1.5;min-height:100vh;}
+.nav{position:sticky;top:0;z-index:100;background:rgba(9,9,14,0.96);border-bottom:1px solid var(--bdr);backdrop-filter:blur(14px);}
+.nav-inner{max-width:1000px;margin:0 auto;padding:0 40px;display:flex;align-items:center;height:50px;}
+.logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0;}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--cyera),var(--purple));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo-name{font-weight:700;font-size:13px;color:var(--txt1);}
+.nav-tabs{display:flex;}
+.ntab{height:50px;padding:0 16px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
+.ntab:hover{color:var(--txt1);}
+.ntab.on{color:var(--cyera);border-bottom-color:var(--cyera);font-weight:600;}
+.pg{display:none;}
+.pg.on{display:block;}
+.wrap{max-width:1000px;margin:0 auto;padding:44px 40px 60px;}
+.eyebrow{font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
+.screen-title{font-size:22px;font-weight:600;margin-bottom:6px;}
+.screen-sub{font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:24px;max-width:720px;}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:20px;}
+.mock{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+.mock-bar{background:#080810;border-bottom:1px solid var(--bdr);padding:10px 16px;display:flex;align-items:center;gap:8px;}
+.dots{display:flex;gap:5px;}
+.dot{width:9px;height:9px;border-radius:50%;}
+.mock-label{font-size:11px;color:var(--txt3);margin-left:6px;}
+.mock-tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--card);padding:0 14px;}
+.mtab{padding:8px 14px;font-size:11px;color:var(--txt2);}
+.mtab.on{color:var(--cyera);border-bottom:2px solid var(--cyera);font-weight:600;}
+.mock-body{padding:16px;background:var(--card);}
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;gap:4px;}
+.badge.g{background:var(--gbg);color:var(--green);border:1px solid var(--gbdr);}
+.badge.a{background:var(--abg);color:var(--amber);border:1px solid var(--abdr);}
+.badge.r{background:var(--rbg);color:var(--red);border:1px solid var(--rbdr);}
+.badge.b{background:var(--glow);color:var(--cyera);border:1px solid rgba(108,71,255,0.25);}
+.badge.p{background:var(--pbg);color:var(--purple);border:1px solid var(--pbdr);}
+.badge.gray{background:var(--bg3);color:var(--txt2);border:1px solid var(--bdr);}
+.pbar{background:var(--bg3);border-radius:3px;height:5px;overflow:hidden;margin:4px 0;}
+.pfill{height:100%;border-radius:3px;}
+.footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;}
+.footer-note{font-size:11px;color:var(--txt3);line-height:1.5;}
+.footer-cta{background:var(--glow);border:1px solid rgba(108,71,255,0.25);color:var(--cyera);font-size:11px;font-weight:600;padding:5px 14px;border-radius:6px;}
+.step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--cyera),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.step-card{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px;margin-bottom:12px;}
+.step-content h3{font-size:14px;font-weight:600;margin-bottom:4px;}
+.step-content p{font-size:13px;color:var(--txt2);line-height:1.7;margin:0;}
+.url-box{background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--cyera);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:12px;font-family:monospace;color:var(--cyera);word-break:break-all;}
+.tip-box{background:var(--gbg);border:1px solid var(--gbdr);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:12px;color:var(--green);line-height:1.6;}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.nav{position:relative;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <span class="logo-name">ARIA</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="ntab on"  onclick="show('getstarted',this)">Get Started</button>
+      <button class="ntab" onclick="show('overview',this)">Overview</button>
+      <button class="ntab" onclick="show('dashboard',this)">Manager Dashboard</button>
+      <button class="ntab" onclick="show('training',this)">Training Center</button>
+      <button class="ntab" onclick="show('presentation',this)">Presentation Lab</button>
+      <button class="ntab" onclick="show('plan',this)">30 / 60 / 90 Plan</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ PAGE 1 — OVERVIEW ══════════════════════════════════════════ -->
+<div class="pg" id="pg-overview">
+<div class="wrap">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid var(--bdr);">
+    <div>
+      <div style="font-size:38px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:8px;">
+        <span style="background:linear-gradient(135deg,#f0eff8 0%,var(--cyera) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ARIA</span>
+      </div>
+      <div style="font-size:16px;color:var(--txt2);margin-bottom:4px;">Accelerated Rep Intelligence Agent</div>
+      <div style="font-size:12px;color:var(--txt3);">AI-powered onboarding acceleration for enterprise sales teams &nbsp;·&nbsp; June 2026</div>
+    </div>
+    <div style="flex-shrink:0;margin-left:24px;background:var(--glow);border:1px solid rgba(108,71,255,0.25);border-radius:10px;padding:14px 20px;text-align:center;">
+      <div style="font-size:10px;color:var(--txt2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.6px;">Recoverable Quota Capacity</div>
+      <div style="font-size:26px;font-weight:700;color:var(--cyera);">$10.5M</div>
+      <div style="font-size:10px;color:var(--txt3);">20-rep hiring class</div>
+    </div>
+  </div>
+
+  <!-- THE PROBLEM -->
+  <div style="margin-bottom:32px;">
+    <div class="eyebrow">The Problem</div>
+    <p style="font-size:14px;color:var(--txt2);line-height:1.8;max-width:780px;">Hypergrowth sales organizations are adding hundreds of enterprise sellers to meet accelerating demand for AI-native security solutions. Every month a new seller spends learning rather than selling is a month of quota attainment deferred, and at this pace that cost compounds across an entire hiring class simultaneously. The industry average ramp for an enterprise seller in a complex security category is <strong style="color:var(--txt1);">seven months</strong>. The best-in-class teams reach full productivity in <strong style="color:var(--green);">three and a half</strong>. That gap is not a hiring quality problem. It is a systems problem. ARIA is the system.</p>
+    <p style="font-size:14px;color:var(--txt2);line-height:1.8;max-width:780px;margin-top:14px;">ARIA provides a holistic view of onboarding and training — connecting assessment scores, activity milestones, and prospect engagements into a single ramp health score for every seller. The goal is not just to measure whether a rep completed a module, but whether they are booking meetings, building pipeline, and on pace to close their first deal within 90 days.</p>
+  </div>
+
+  <!-- ROI STRIP -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px;">
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:var(--cyera);margin-bottom:4px;">3.5 mo</div>
+      <div style="font-size:11px;font-weight:500;color:var(--txt1);margin-bottom:2px;">Ramp Time Saved</div>
+      <div style="font-size:10px;color:var(--txt3);">7 months → 3.5 months</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:var(--cyera);margin-bottom:4px;">$525K</div>
+      <div style="font-size:11px;font-weight:500;color:var(--txt1);margin-bottom:2px;">Quota Capacity / Rep</div>
+      <div style="font-size:10px;color:var(--txt3);">$150K/mo × 3.5 months</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.06);border:1px solid var(--gbdr);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:var(--green);margin-bottom:4px;">$10.5M</div>
+      <div style="font-size:11px;font-weight:500;color:var(--txt1);margin-bottom:2px;">Total Recoverable</div>
+      <div style="font-size:10px;color:var(--txt3);">Across 20-rep hiring class</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:var(--cyera);margin-bottom:4px;">~$2.3M</div>
+      <div style="font-size:11px;font-weight:500;color:var(--txt1);margin-bottom:2px;">Closed Revenue Impact</div>
+      <div style="font-size:10px;color:var(--txt3);">At 22% enterprise win rate</div>
+    </div>
+  </div>
+
+  <!-- INTEGRATION DIAGRAM -->
+  <div class="eyebrow">System Integration</div>
+  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:36px;margin-bottom:32px;display:flex;justify-content:center;">
+    <svg viewBox="0 0 700 420" width="700" height="420" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#343445"/>
+        </marker>
+      </defs>
+      <!-- ARIA CENTER -->
+      <rect x="265" y="165" width="170" height="90" rx="14" fill="#0d0a2e" stroke="#6c47ff" stroke-width="2.5"/>
+      <text x="350" y="196" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="22">🛡️</text>
+      <text x="350" y="220" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="16" fill="#6c47ff" font-weight="700">ARIA</text>
+      <text x="350" y="238" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Accelerated Rep Intelligence Agent</text>
+      <!-- SPOKES -->
+      <line x1="176" y1="88" x2="282" y2="178" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="350" y1="76" x2="350" y2="163" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="524" y1="88" x2="418" y2="178" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="136" y1="210" x2="263" y2="210" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="564" y1="210" x2="437" y2="210" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="176" y1="332" x2="282" y2="242" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="350" y1="344" x2="350" y2="257" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="524" y1="332" x2="418" y2="242" stroke="#343445" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Salesforce top-left -->
+      <rect x="80" y="54" width="136" height="68" rx="10" fill="#1a1000" stroke="#f57c00" stroke-width="1.5"/>
+      <text x="148" y="79" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">⚡</text>
+      <text x="148" y="97" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Salesforce</text>
+      <text x="148" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">CRM · Pipeline · Forecast</text>
+      <!-- Product Platform top-center -->
+      <rect x="277" y="14" width="146" height="68" rx="10" fill="#0d0a2e" stroke="#6c47ff" stroke-width="1.5"/>
+      <text x="350" y="39" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">🔒</text>
+      <text x="350" y="57" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Product Platform</text>
+      <text x="350" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Playbooks · Battle Cards</text>
+      <!-- Gong top-right -->
+      <rect x="484" y="54" width="136" height="68" rx="10" fill="#052e1a" stroke="#10b981" stroke-width="1.5"/>
+      <text x="552" y="79" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">📅</text>
+      <text x="552" y="97" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Gong / Calendar</text>
+      <text x="552" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Calls · Activity · Meetings</text>
+      <!-- Okta left -->
+      <rect x="28" y="176" width="136" height="68" rx="10" fill="#1e1040" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="96" y="201" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">👤</text>
+      <text x="96" y="219" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Okta / Identity</text>
+      <text x="96" y="234" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">SSO · Provisioning</text>
+      <!-- HRIS right -->
+      <rect x="536" y="176" width="136" height="68" rx="10" fill="#151515" stroke="#6b7280" stroke-width="1.5"/>
+      <text x="604" y="201" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">💼</text>
+      <text x="604" y="219" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">HRIS / Workday</text>
+      <text x="604" y="234" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Hire Date · Org Structure</text>
+      <!-- Slack bottom-left -->
+      <rect x="80" y="298" width="136" height="68" rx="10" fill="#2d1f00" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="148" y="323" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">💬</text>
+      <text x="148" y="341" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Slack</text>
+      <text x="148" y="356" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Nudges · Alerts · Digest</text>
+      <!-- LMS bottom-center -->
+      <rect x="277" y="346" width="146" height="68" rx="10" fill="#2d1f00" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="350" y="371" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">🎓</text>
+      <text x="350" y="389" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">LMS</text>
+      <text x="350" y="404" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Completion · Certification</text>
+      <!-- Analytics bottom-right -->
+      <rect x="484" y="298" width="136" height="68" rx="10" fill="#082f49" stroke="#6c47ff" stroke-width="1.5"/>
+      <text x="552" y="323" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="18">📊</text>
+      <text x="552" y="341" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#f0eff8" font-weight="600">Analytics</text>
+      <text x="552" y="356" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9896b0">Dashboards · Reporting</text>
+    </svg>
+  </div>
+
+  <!-- VALUE PILLARS -->
+  <div class="eyebrow">What ARIA Delivers</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;">
+    <div style="background:rgba(108,71,255,0.06);border:1px solid rgba(108,71,255,0.2);border-left:3px solid var(--cyera);border-radius:0 10px 10px 0;padding:18px;">
+      <div style="font-size:20px;margin-bottom:8px;">⚡</div>
+      <div style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">Speed to Revenue</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.7;">Cuts ramp from 7 months to 3.5 months through structured AI-guided progression. Every new seller starts day one with a ramp plan and daily action items calibrated specifically to the enterprise selling motion and the Majors segment.</div>
+    </div>
+    <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-left:3px solid var(--purple);border-radius:0 10px 10px 0;padding:18px;">
+      <div style="font-size:20px;margin-bottom:8px;">🎯</div>
+      <div style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">Skill Precision</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.7;">Five AI-evaluated training modules covering the enterprise selling motion — value framework, trigger identification, CISO stakeholder mapping, competitive positioning against Microsoft Purview, Wiz, and BigID, and objection handling. Each module is evaluated in real time by Claude.</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:18px;">
+      <div style="font-size:20px;margin-bottom:8px;">📊</div>
+      <div style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">Manager Intelligence</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.7;">A cohort health dashboard surfaces every rep's progress, scores, and pipeline activity in one view. AI learning gap analysis identifies who is falling behind and why. The weekly 1:1 coaching agenda is generated automatically — the manager walks in ready to coach, not to gather status.</div>
+    </div>
+    <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:18px;">
+      <div style="font-size:20px;margin-bottom:8px;">🔄</div>
+      <div style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">Compounding Returns</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.7;">Institutional knowledge accumulates with every hiring class — each cohort ramps faster than the last. Win and loss patterns build a benchmark of what quota attainment in month 4 looks like. The platform powers the knowledge layer — securing and scaling institutional knowledge with every new hiring class.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">ARIA — Accelerated Rep Intelligence Agent<br>Prepared by Daniel · June 2026</div>
+    <div class="footer-cta">Live demo available — see Get Started tab</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 2 — MANAGER DASHBOARD ════════════════════════════════ -->
+<div class="pg" id="pg-dashboard">
+<div class="wrap">
+  <div class="eyebrow">Screen 1 of 4</div>
+  <div class="screen-title">Manager Cohort Dashboard</div>
+  <p class="screen-sub">Every Monday the manager opens one view. AI surfaces what changed in each rep's ramp progress, flags who is falling behind, and generates a personalized 1:1 coaching agenda for each. No spreadsheets, no manual status gathering, no preparation required.</p>
+
+  <div class="mock" style="margin-bottom:28px;">
+    <div class="mock-bar">
+      <div class="dots"><div class="dot" style="background:#ef4444;"></div><div class="dot" style="background:#f59e0b;"></div><div class="dot" style="background:#10b981;"></div></div>
+      <span class="mock-label">ARIA — Manager Dashboard · Week of June 2, 2026</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;background:#080810;border-bottom:1px solid var(--bdr);">
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--txt2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">Recoverable Quota Capacity</div>
+        <div style="font-size:20px;font-weight:700;color:var(--cyera);">$10.5M</div>
+        <div style="font-size:10px;color:var(--txt3);">20-rep hiring class</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--txt2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">Active Reps</div>
+        <div style="font-size:20px;font-weight:700;color:var(--txt1);">3</div>
+        <div style="font-size:10px;color:var(--txt3);">In ramp program</div>
+      </div>
+      <div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--green);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">On Track</div>
+        <div style="font-size:20px;font-weight:700;color:var(--green);">1</div>
+        <div style="font-size:10px;color:var(--green);opacity:0.7;">Health score 75%+</div>
+      </div>
+      <div style="background:var(--rbg);border:1px solid var(--rbdr);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--red);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">Needs Attention</div>
+        <div style="font-size:20px;font-weight:700;color:var(--red);">1</div>
+        <div style="font-size:10px;color:var(--red);opacity:0.7;">Health score below 55%</div>
+      </div>
+    </div>
+    <!-- REP CARDS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px;background:#080810;">
+      <div style="background:var(--gbg);border:1.5px solid var(--gbdr);border-radius:10px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:1px;">Jamie Okafor</div><div style="font-size:10px;color:var(--txt2);">Strategic Seller · Day 22</div></div>
+          <span class="badge g">On Track</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--green);">81%</div><div style="font-size:9px;color:var(--txt2);">Health</div></div>
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--green);">83</div><div style="font-size:9px;color:var(--txt2);">Avg score</div></div>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:81%;background:var(--green);"></div></div>
+        <div style="font-size:10px;color:var(--txt2);margin-top:6px;">3/5 modules · Pres lab: 72 · Ahead of pace</div>
+      </div>
+      <div style="background:var(--abg);border:1.5px solid var(--abdr);border-radius:10px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:1px;">Alex Rivera</div><div style="font-size:10px;color:var(--txt2);">Strategic Seller · Day 42</div></div>
+          <span class="badge a">Watch</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--amber);">58%</div><div style="font-size:9px;color:var(--txt2);">Health</div></div>
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--red);">M4 ×2</div><div style="font-size:9px;color:var(--txt2);">Failed attempts</div></div>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:58%;background:var(--amber);"></div></div>
+        <div style="font-size:10px;color:var(--txt2);margin-top:6px;">Purview objection gap · No pres lab · 1 meeting booked</div>
+      </div>
+      <div style="background:var(--rbg);border:1.5px solid var(--rbdr);border-radius:10px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:1px;">Morgan Chen</div><div style="font-size:10px;color:var(--txt2);">Enterprise Seller · Day 61</div></div>
+          <span class="badge r">Needs Attention</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--red);">44%</div><div style="font-size:9px;color:var(--txt2);">Health</div></div>
+          <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--red);">0</div><div style="font-size:9px;color:var(--txt2);">Qualified opps</div></div>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:44%;background:var(--red);"></div></div>
+        <div style="font-size:10px;color:var(--txt2);margin-top:6px;">Strong scores · Zero pipeline · Prospecting gap</div>
+      </div>
+    </div>
+    <!-- COACHING PANEL -->
+    <div style="padding:16px;background:var(--card);border-top:1px solid var(--bdr);">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="color:var(--purple);">✦</span> AI Coaching Points — Morgan Chen <span class="badge r" style="font-size:9px;margin-left:4px;">High Priority</span></div>
+          <div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;line-height:1.5;align-items:flex-start;">
+            <span style="font-weight:700;color:var(--cyera);flex-shrink:0;width:14px;">1</span>
+            <span style="color:var(--txt2);">Zero qualified opportunities at day 61 despite strong assessment scores across all five modules. This is a prospecting activity gap — not a knowledge gap. The rep understands the DSPM value framework but is not converting it into CISO outreach.</span>
+          </div>
+          <div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:11px;line-height:1.5;align-items:flex-start;">
+            <span style="font-weight:700;color:var(--cyera);flex-shrink:0;width:14px;">2</span>
+            <span style="color:var(--txt2);">Presentation lab score improving (59 to 66) but not yet at the 80-point target. Schedule attempt 3 this week before the next prospect conversation.</span>
+          </div>
+          <div style="display:flex;gap:8px;padding:7px 0;font-size:11px;line-height:1.5;align-items:flex-start;">
+            <span style="font-weight:700;color:var(--cyera);flex-shrink:0;width:14px;">3</span>
+            <span style="color:var(--txt2);">Two missed outreach milestones in the last 10 days. This week's 1:1 must focus entirely on activity commitments — specific CISO targets, specific outreach, specific dates.</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:10px;">✦ AI-Generated 1:1 Agenda — Morgan Chen</div>
+          <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:11px;line-height:1.5;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--txt2);flex-shrink:0;">1</div>
+            <span style="color:var(--txt2);">Zero qualified opportunities at day 61 — walk me through your CISO outreach over the last two weeks. Specific accounts, specific contacts, specific responses received.</span>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:11px;line-height:1.5;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--txt2);flex-shrink:0;">2</div>
+            <span style="color:var(--txt2);">Presentation score is improving. What specifically are you changing between attempts? Schedule attempt 3 before your next prospect call.</span>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 0;font-size:11px;line-height:1.5;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--txt2);flex-shrink:0;">3</div>
+            <span style="color:var(--txt2);">You have the knowledge. I want a specific commitment today — how many CISO outreach attempts this week and to which Bay Area accounts?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">Manager Dashboard — AI coaching agendas generated from ramp progress and Salesforce activity · No manual preparation required</div>
+    <div class="footer-cta">Live demo — see Get Started tab</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 3 — TRAINING CENTER ══════════════════════════════════ -->
+<div class="pg" id="pg-training">
+<div class="wrap">
+  <div class="eyebrow">Screen 2 of 4</div>
+  <div class="screen-title">Training Center — AI-Evaluated Assessments</div>
+  <p class="screen-sub">Five scenario-based modules built specifically around an enterprise selling motion for Majors accounts. Each ends with a written assessment scored by Claude in real time — dimension-level feedback, specific coaching, no waiting for a manager review.</p>
+
+  <div class="mock" style="margin-bottom:28px;">
+    <div class="mock-bar">
+      <div class="dots"><div class="dot" style="background:#ef4444;"></div><div class="dot" style="background:#f59e0b;"></div><div class="dot" style="background:#10b981;"></div></div>
+      <span class="mock-label">ARIA — Training Center · Module 4 — Competitive Positioning · Assessment</span>
+    </div>
+    <div class="mock-tabs">
+      <div class="mtab">Content</div>
+      <div class="mtab on">Assessment</div>
+    </div>
+    <div class="mock-body">
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:12px;margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Scenario — Microsoft Purview Competitive Objection</div>
+        <p style="font-size:12px;color:var(--txt2);line-height:1.6;">"This is interesting, but we are already deep into a Microsoft Purview evaluation. Our CTO is personally committed to the Microsoft ecosystem and I am not sure we have appetite for another data security vendor."</p>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rep Response</div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:12px;color:var(--txt2);line-height:1.6;font-style:italic;">
+          "That makes complete sense — Purview DSPM for AI is a real and capable tool within the Microsoft ecosystem. The question I would ask is: what percentage of your sensitive data actually lives in Microsoft environments? For most enterprises it is 30 to 40 percent. The other 60 percent lives in AWS, GCP, Snowflake, Databricks, and on-premises systems that Purview does not reach with the same depth. That is where this platform operates — and that is where the undiscovered risk concentrates for a company processing data at your scale. Would it be worth 20 minutes to see specifically which gaps the platform would surface in your environment alongside Purview?"
+        </div>
+      </div>
+      <div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="text-align:center;flex-shrink:0;">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.12);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;"><span style="font-size:20px;font-weight:700;color:var(--green);">83</span></div>
+            <div style="font-size:10px;color:var(--green);margin-top:4px;font-weight:600;">PASSED</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px;">Assessment Passed — Strong Response</div>
+            <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:10px;">The response handles the Purview objection credibly without being defensive. The scope question — what percentage of your data lives in Microsoft environments — is the right reframe and advances the conversation.</p>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Credible Acknowledgment</span><span style="font-weight:600;color:var(--green);">28/30</span></div>
+                <div class="pbar"><div class="pfill" style="width:93%;background:var(--green);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Differentiation Clarity</span><span style="font-weight:600;color:var(--amber);">31/40</span></div>
+                <div class="pbar"><div class="pfill" style="width:77%;background:var(--amber);"></div></div>
+                <div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5;">Consider naming a specific datastore — Snowflake or Databricks — that Purview does not reach with the same precision to make the differentiation concrete for this prospect.</div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Conversation Advancement</span><span style="font-weight:600;color:var(--green);">24/30</span></div>
+                <div class="pbar"><div class="pfill" style="width:80%;background:var(--green);"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+        <div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:11px;font-weight:600;color:var(--green);">✓ 84</div><div style="font-size:9px;color:var(--txt2);margin-top:2px;">Value Framework</div></div>
+        <div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:11px;font-weight:600;color:var(--green);">✓ 79</div><div style="font-size:9px;color:var(--txt2);margin-top:2px;">Triggers</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:8px;text-align:center;opacity:0.5;"><div style="font-size:11px;font-weight:600;color:var(--txt3);">—</div><div style="font-size:9px;color:var(--txt2);margin-top:2px;">Discovery</div></div>
+        <div style="background:var(--gbg);border:1px solid var(--gbdr);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:11px;font-weight:600;color:var(--green);">✓ 83</div><div style="font-size:9px;color:var(--txt2);margin-top:2px;">Competitive</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:8px;text-align:center;opacity:0.5;"><div style="font-size:11px;font-weight:600;color:var(--txt3);">—</div><div style="font-size:9px;color:var(--txt2);margin-top:2px;">Objections</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">Training Center — 5 modules · AI evaluation returns dimension scores and written feedback in under 15 seconds · No manager review required</div>
+    <div class="footer-cta">Live demo — see Get Started tab</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 4 — PRESENTATION LAB ═════════════════════════════════ -->
+<div class="pg" id="pg-presentation">
+<div class="wrap">
+  <div class="eyebrow">Screen 3 of 4</div>
+  <div class="screen-title">Presentation Lab — Live CISO Discovery Call Evaluation</div>
+  <p class="screen-sub">The rep records a 15-minute live discovery call with a fictitious CISO using their camera and microphone. Speech is transcribed in real time. Claude evaluates the transcript across five dimensions and returns a scored coaching report within seconds. Managers see every attempt and the full score trajectory.</p>
+
+  <div class="mock" style="margin-bottom:28px;">
+    <div class="mock-bar">
+      <div class="dots"><div class="dot" style="background:#ef4444;"></div><div class="dot" style="background:#f59e0b;"></div><div class="dot" style="background:#10b981;"></div></div>
+      <span class="mock-label">ARIA — Presentation Lab · Visa Inc. · Attempt 2 of 3</span>
+    </div>
+    <div class="mock-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;">
+          <div style="font-size:10px;font-weight:600;color:var(--cyera);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Account Brief</div>
+          <div style="font-size:11px;color:var(--txt2);line-height:1.8;">
+            <span style="color:var(--txt1);font-weight:500;">Visa Inc.</span><br>
+            $33B · 26,500 employees · Foster City, CA<br>
+            AWS, GCP, Azure, Microsoft 365, payment systems<br>
+            <span style="color:var(--amber);">Trigger: PCI DSS 4.0 deadline Q3 · Board AI governance mandate · Copilot deployed in engineering</span>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;">
+          <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Call Objectives</div>
+          <div style="font-size:11px;color:var(--txt2);line-height:1.8;">
+            1. Open with a specific business insight — not a product pitch<br>
+            2. Run diagnostic discovery on the data visibility gap<br>
+            3. Handle: "We already have Microsoft Purview"<br>
+            4. Handle: "We are not ready for another security tool"<br>
+            5. Close for a specific, dated next step
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:20px;">
+        <div style="font-size:11px;color:var(--txt2);font-weight:500;white-space:nowrap;">Score Trajectory:</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">59</div><div style="font-size:9px;color:var(--txt2);">Attempt 1</div></div>
+          <span style="color:var(--txt3);">→</span>
+          <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">66</div><div style="font-size:9px;color:var(--txt2);">Attempt 2</div></div>
+          <span style="color:var(--txt3);">→</span>
+          <div style="background:var(--glow);border:1px solid rgba(108,71,255,0.3);border-radius:6px;padding:6px 12px;text-align:center;">
+            <div style="font-size:13px;font-weight:600;color:var(--cyera);">Attempt 3</div>
+            <div style="font-size:9px;color:var(--txt2);">Target: 80+</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:var(--txt3);">+7 pts between attempts</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--txt1);margin-bottom:12px;">Rubric Scores — Attempt 2</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Opening and Point of View</span><span style="font-weight:600;color:var(--amber);">13/20</span></div>
+              <div class="pbar"><div class="pfill" style="width:65%;background:var(--amber);"></div></div>
+              <div style="font-size:10px;color:var(--txt2);margin-top:3px;line-height:1.5;">Lead with Visa's PCI DSS 4.0 deadline and the Copilot deployment specifically — not a general data security observation.</div>
+            </div>
+            <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Discovery Quality</span><span style="font-weight:600;color:var(--green);">15/20</span></div><div class="pbar"><div class="pfill" style="width:75%;background:var(--green);"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Platform Value Alignment</span><span style="font-weight:600;color:var(--green);">14/20</span></div><div class="pbar"><div class="pfill" style="width:70%;background:var(--green);"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Objection Handling</span><span style="font-weight:600;color:var(--amber);">14/20</span></div><div class="pbar"><div class="pfill" style="width:70%;background:var(--amber);"></div></div></div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>Close and Next Step</span><span style="font-weight:600;color:var(--red);">10/20</span></div>
+              <div class="pbar"><div class="pfill" style="width:50%;background:var(--red);"></div></div>
+              <div style="font-size:10px;color:var(--txt2);margin-top:3px;line-height:1.5;">Replace the open-ended close with: "Can we get 30 minutes with your VP Cloud Security this week to map the specific datastores the platform would classify before your Q3 PCI deadline?"</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--cyera);margin-bottom:10px;">✦ AI Coaching Priorities for Attempt 3</div>
+          <div style="background:var(--glow);border:1px solid rgba(108,71,255,0.2);border-radius:8px;padding:10px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:600;color:var(--cyera);margin-bottom:4px;">1. Rewrite the opening</div>
+            <div style="font-size:11px;color:var(--txt2);line-height:1.5;">Reference Visa's PCI DSS 4.0 Q3 deadline and the Copilot engineering deployment in the first two sentences. This earns relevance immediately and positions the conversation around their stated urgency.</div>
+          </div>
+          <div style="background:var(--glow);border:1px solid rgba(108,71,255,0.2);border-radius:8px;padding:10px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:600;color:var(--cyera);margin-bottom:4px;">2. Sharpen the close</div>
+            <div style="font-size:11px;color:var(--txt2);line-height:1.5;">Name a specific stakeholder, a specific topic, and a specific timeframe tied to the PCI deadline. Karen Liu's time is limited — make the next step easy to approve in the moment.</div>
+          </div>
+          <div style="background:var(--pbg);border:1px solid var(--pbdr);border-radius:8px;padding:10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--purple);margin-bottom:4px;">Manager Action</div>
+            <div style="font-size:11px;color:var(--txt2);line-height:1.5;">Review these two coaching points before attempt 3. A 14-point improvement to reach 80 is achievable with focused preparation on the opening and close specifically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">Presentation Lab — Live recording with WebRTC · Real-time speech transcription · AI evaluation and coaching report in under 30 seconds</div>
+    <div class="footer-cta">Live demo — see Get Started tab</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 5 — 30/60/90 PLAN ════════════════════════════════════ -->
+<div class="pg" id="pg-plan">
+<div class="wrap">
+  <div class="eyebrow">Screen 4 of 4</div>
+  <div class="screen-title">30 / 60 / 90 Day Ramp Plan</div>
+  <p class="screen-sub">Every new seller enters ARIA on day one with a fully structured ramp plan calibrated to the enterprise selling motion in the Majors segment. Each action item is sequenced and type-coded. Activity milestones are verified automatically from Salesforce and calendar data wherever possible — eliminating self-reporting entirely.</p>
+
+  <div class="mock" style="margin-bottom:28px;">
+    <div class="mock-bar">
+      <div class="dots"><div class="dot" style="background:#ef4444;"></div><div class="dot" style="background:#f59e0b;"></div><div class="dot" style="background:#10b981;"></div></div>
+      <span class="mock-label">ARIA — 30/60/90 Plan · Alex Rivera · Day 42 of 90</span>
+    </div>
+    <div class="mock-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div style="background:var(--bg2);border:1px solid var(--gbdr);border-radius:8px;padding:10px;opacity:0.6;">
+          <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:2px;">Phase 1 — Complete ✓</div>
+          <div style="font-size:12px;font-weight:600;">Days 1–30</div>
+          <div style="font-size:10px;color:var(--txt2);">Foundation and Product Fluency</div>
+        </div>
+        <div style="background:var(--bg2);border:2px solid var(--purple);border-radius:8px;padding:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+            <span style="font-size:10px;font-weight:600;color:var(--purple);">Phase 2 — Current</span>
+            <span class="badge p" style="font-size:9px;">Active</span>
+          </div>
+          <div style="font-size:12px;font-weight:600;">Days 31–60</div>
+          <div style="font-size:10px;color:var(--txt2);">First CISO Conversations</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:10px;opacity:0.5;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt3);margin-bottom:2px;">Phase 3</div>
+          <div style="font-size:12px;font-weight:600;">Days 61–90</div>
+          <div style="font-size:10px;color:var(--txt2);">Pipeline and First Close</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gbg);border:1px solid var(--gbdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--green);font-size:12px;">✓</span></div>
+          <div style="flex:1;"><div style="font-size:12px;margin-bottom:3px;">Launch outreach sequences for all priority Majors accounts — minimum 3 personalized touchpoints per account</div><div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--txt3);">Day 32</span><span class="badge g" style="font-size:9px;">Complete</span><span class="badge b" style="font-size:9px;">Activity</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gbg);border:1px solid var(--gbdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--green);font-size:12px;">✓</span></div>
+          <div style="flex:1;"><div style="font-size:12px;margin-bottom:3px;">Complete advanced objection handling assessment — target 75%+ <span style="color:var(--green);font-size:11px;">(Scored 78)</span></div><div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--txt3);">Day 35</span><span class="badge g" style="font-size:9px;">Complete</span><span class="badge p" style="font-size:9px;">Assessment</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gbg);border:1px solid var(--gbdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--green);font-size:12px;">✓</span></div>
+          <div style="flex:1;"><div style="font-size:12px;margin-bottom:3px;">Book first meeting with a CISO or VP of Security at a Bay Area Majors account</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;color:var(--txt3);">Day 38</span><span class="badge g" style="font-size:9px;">Complete</span><span class="badge g" style="font-size:9px;">⚡ Verified via Salesforce</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px;padding:10px 8px;border-bottom:1px solid var(--bdr);align-items:flex-start;background:rgba(108,71,255,0.05);border-radius:8px;margin:0 -8px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--glow);border:2px solid var(--cyera);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--cyera);">→</div>
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:600;color:var(--cyera);margin-bottom:2px;">CURRENT PRIORITY</div>
+            <div style="font-size:12px;font-weight:500;margin-bottom:3px;">Complete second Presentation Lab attempt — target +15 points improvement from attempt 1</div>
+            <div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--txt3);">Day 40</span><span class="badge a" style="font-size:9px;">Overdue by 2 days</span><span class="badge b" style="font-size:9px;">Presentation</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;opacity:0.5;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--txt3);">42</div>
+          <div style="flex:1;"><div style="font-size:12px;margin-bottom:3px;">Submit account plans for two priority Majors accounts to manager for review</div><div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--txt3);">Day 42</span><span class="badge gray" style="font-size:9px;">Upcoming</span><span class="badge b" style="font-size:9px;">Activity</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0;align-items:flex-start;opacity:0.5;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--txt3);">48</div>
+          <div style="flex:1;"><div style="font-size:12px;margin-bottom:3px;">Book second CISO or VP Security meeting at a Bay Area Majors account</div><div style="display:flex;gap:6px;"><span style="font-size:10px;color:var(--txt3);">Day 48</span><span class="badge gray" style="font-size:9px;">Upcoming</span><span class="badge r" style="font-size:9px;">Milestone</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:linear-gradient(135deg,rgba(108,71,255,0.08),rgba(139,92,246,0.08));border:1px solid rgba(108,71,255,0.2);border-radius:12px;padding:24px;margin-bottom:28px;">
+    <p style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">The Core Question</p>
+    <p style="font-size:15px;color:var(--txt2);line-height:1.8;font-style:italic;margin-bottom:12px;">"If your sellers reached full productivity in 3.5 months instead of 7 — not because you hired differently, but because you built a better system for developing them — what does that do to your number this year, and every year after?"</p>
+    <p style="font-size:13px;color:var(--cyera);font-weight:500;">ARIA is that system. Available to explore right now — see the Get Started tab.</p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">30/60/90 Plan — Daily action items sequenced to the enterprise selling motion · Salesforce verifies milestones automatically · No self-reporting required</div>
+    <div class="footer-cta">Live demo — see Get Started tab</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 6 — GET STARTED ═══════════════════════════════════════ -->
+<div class="pg on" id="pg-getstarted">
+<div class="wrap">
+  <div class="eyebrow">Access and Instructions</div>
+  <div class="screen-title">Get Started</div>
+  <!-- PERSONAL NOTE -->
+  <div style="background:var(--glow);border:1px solid rgba(108,71,255,0.25);border-radius:12px;padding:20px;margin-bottom:32px;display:flex;gap:16px;align-items:flex-start;">
+    <div style="width:40px;height:40px;background:linear-gradient(135deg,var(--cyera),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👋</div>
+    <div>
+      <p style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:6px;">A note from Daniel</p>
+      <p style="font-size:13px;color:var(--txt2);line-height:1.7;margin:0;">Everything in this demo is built around an enterprise selling motion in the Majors segment. The accounts are real Bay Area companies over $1B in revenue. The training modules, competitive scenarios, and presentation lab are calibrated to a complex enterprise security sale. This tool was built to demonstrate how AI can be operationalized to accelerate rep onboarding and reduce ramp time — and is designed to be explored independently without a walkthrough.</p>
+    </div>
+  </div>
+
+  <!-- TWO OPTIONS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;">
+
+    <!-- OPTION 1: ONE-PAGER -->
+    <div class="card" style="border-top:3px solid var(--cyera);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:36px;height:36px;background:var(--glow);border:1px solid rgba(108,71,255,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📋</div>
+        <div>
+          <p style="font-weight:600;font-size:14px;margin:0;">Executive Overview</p>
+          <p style="font-size:11px;color:var(--txt2);margin:0;">You are here · No setup required</p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:12px;">This five-tab document covers the full ARIA story — the business case, the integration diagram, and mockups of every screen. Use the tabs at the top to navigate. No login, no download, opens in any browser.</p>
+      <div class="url-box">sales-intelligence/ARIA_OnePager.html</div>
+      <div class="tip-box">You are already here. Use the tabs above to explore each screen.</div>
+    </div>
+
+    <!-- OPTION 2: LIVE DEMO -->
+    <div class="card" style="border-top:3px solid var(--green);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:36px;height:36px;background:var(--gbg);border:1px solid var(--gbdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🚀</div>
+        <div>
+          <p style="font-weight:600;font-size:14px;margin:0;">Live Interactive Demo</p>
+          <p style="font-size:11px;color:var(--txt2);margin:0;">Full tool · Demo mode · No API key needed</p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:12px;">The complete ARIA application. Switch between Manager View and Rep View, run a training assessment and receive AI-scored feedback, try the Presentation Lab with a written submission, and generate the AI learning gap analysis — all with no setup.</p>
+      <div class="url-box">sales-intelligence/ARIA_Demo.html</div>
+      <div class="tip-box">Click the link above and select Launch Demo Mode — No API Key Required. The full tool opens immediately.</div>
+    </div>
+  </div>
+
+  <!-- STEP BY STEP INSTRUCTIONS -->
+  <div class="eyebrow">Step-by-Step — Live Demo Walkthrough</div>
+  <p style="font-size:13px;color:var(--txt2);margin-bottom:20px;line-height:1.7;">Follow these steps to explore the full ARIA experience in under 10 minutes.</p>
+
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>Open the live demo</h3>
+      <p>Open Chrome and navigate to the demo URL above. You will see the ARIA login screen with two buttons. Click <strong style="color:var(--txt1);">Launch Demo Mode — No API Key Required.</strong> The full application opens immediately.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Explore the Manager Dashboard</h3>
+      <p>You land on the Manager Dashboard in Manager View. You will see the $10.5M recoverable quota capacity headline, three rep health cards — Jamie in green, Alex in amber, and Morgan in red — and the AI Learning Gap Analysis panel at the bottom. Click <strong style="color:var(--txt1);">Generate Analysis</strong> to run the AI cohort analysis. It returns in about two seconds with specific coaching priorities across the team.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h3>Switch to Rep View</h3>
+      <p>Click the <strong style="color:var(--txt1);">Rep View</strong> button in the top right next to the Manager View toggle. Use the dropdown beside it to switch between Alex Rivera, Jamie Okafor, and Morgan Chen. Each rep shows a different ramp health state, progress across modules, and today's priority actions. Morgan Chen's profile (red card) is the most compelling to click through — strong assessment scores with zero pipeline activity at day 61.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h3>Run a Training Module Assessment</h3>
+      <p>Click <strong style="color:var(--txt1);">Training Center</strong> in the top navigation. Select any module — Module 4 Competitive Positioning is the most relevant to explore. Read through the content sections, then click <strong style="color:var(--txt1);">Continue to Assessment.</strong> Read the Microsoft Purview competitive scenario and write your response in the text box. Click <strong style="color:var(--txt1);">Submit for AI Evaluation.</strong> Claude returns a scored evaluation with dimension-level written feedback in under 15 seconds.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <h3>Try the Presentation Lab</h3>
+      <p>Click <strong style="color:var(--txt1);">Presentation Lab</strong> in the top navigation. Read the Visa Inc. account brief and the five call objectives. Choose <strong style="color:var(--txt1);">Option B — Written Submission</strong> and type how you would open a 15-minute CISO discovery call with Karen Liu. Aim for 200 words or more. Click <strong style="color:var(--txt1);">Submit Written Assessment.</strong> Claude evaluates it across five dimensions and returns a full scoring report with coaching priorities.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">6</div>
+    <div class="step-content">
+      <h3>Review the 30/60/90 Plan</h3>
+      <p>Click <strong style="color:var(--txt1);">30/60/90 Plan</strong> in the top navigation. The three phase buttons at the top switch between Phase 1, Phase 2, and Phase 3. The current phase for the active rep is highlighted. Each action item is color-coded by type — blue for activity, purple for assessment, amber for presentation, red for milestone. Items verified automatically from Salesforce show the ⚡ Salesforce badge.</p>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;margin-top:8px;">
+    <p style="font-size:14px;font-weight:600;color:var(--txt1);margin-bottom:8px;">Questions or want a live walkthrough?</p>
+    <p style="font-size:13px;color:var(--txt2);line-height:1.7;margin:0;">I am happy to walk through both ARIA and the sales planning system live — either together or separately depending on what is most useful. The goal is to show how these tools work as a connected system for scaling an enterprise sales team. Reach out any time and I will make it happen on your schedule.</p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">ARIA — Accelerated Rep Intelligence Agent<br>Prepared by Daniel · June 2026</div>
+    <div class="footer-cta">Built for high-growth sales teams</div>
+  </div>
+</div>
+</div>
+
+<script>
+function show(id, tab) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('on'));
+  document.getElementById('pg-' + id).classList.add('on');
+  tab.classList.add('on');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

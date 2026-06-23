@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA — Accelerated Rep Intelligence Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#09090e;--bg2:#111118;--bg3:#1a1a24;--card:#14141c;
+  --bdr:#252530;--bdr2:#343445;
+  --txt1:#f0eff8;--txt2:#9896b0;--txt3:#55536a;
+  --cyera:#6c47ff;--cyera2:#4f2fe0;--glow:rgba(108,71,255,0.15);
+  --green:#10b981;--gbg:#052e1a;--gbdr:#064e2a;
+  --amber:#f59e0b;--abg:#2d1f00;--abdr:#4d3500;
+  --red:#ef4444;--rbg:#2d0a0a;--rbdr:#4d1212;
+  --purple:#8b5cf6;--pbg:#1e1040;--pbdr:#3b2070;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt1);font-size:14px;line-height:1.5;min-height:100vh;}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;font-size:13px;border-radius:var(--r-md);padding:8px 16px;border:1px solid var(--bdr2);background:transparent;color:var(--txt1);}
+button:hover:not(:disabled){background:var(--bg3);}
+button:active:not(:disabled){transform:scale(0.98);}
+button:disabled{opacity:0.4;cursor:not-allowed;}
+button.primary{background:var(--cyera);border-color:var(--cyera);color:#fff;font-weight:500;}
+button.primary:hover:not(:disabled){background:var(--cyera2);}
+button.danger{background:var(--rbg);border-color:var(--rbdr);color:var(--red);}
+input,textarea,select{font-family:'DM Sans',sans-serif;background:var(--bg2);border:1px solid var(--bdr);color:var(--txt1);border-radius:var(--r-md);padding:9px 12px;font-size:13px;outline:none;width:100%;}
+input:focus,textarea:focus,select:focus{border-color:var(--cyera);box-shadow:0 0 0 3px var(--glow);}
+textarea{resize:vertical;}
+label{font-size:12px;color:var(--txt2);display:block;margin-bottom:5px;font-weight:500;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.3s ease forwards;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+/* ── ROI CONSTANTS ─────────────────────────────────────────────── */
+const ROI={
+  QUOTA:1800000,
+  AVG_RAMP_MONTHS:7,
+  TARGET_RAMP_MONTHS:3.5,
+  HIRING_CLASS:20,
+  get MONTHS_SAVED(){return this.AVG_RAMP_MONTHS-this.TARGET_RAMP_MONTHS;},
+  get REVENUE_PER_REP(){return Math.round(this.QUOTA/12*this.MONTHS_SAVED);},
+  get TOTAL_RECOVERABLE(){return this.REVENUE_PER_REP*this.HIRING_CLASS;},
+};
+
+/* ── CYERA MODULE DEFINITIONS ──────────────────────────────────── */
+const MODULES=[
+  {
+    id:"m1",
+    title:"The Cyera Value Framework",
+    icon:"ti-shield-lock",
+    duration:"25 min",
+    passingScore:70,
+    description:"Master the core problem Cyera solves and the three-part value framework that anchors every enterprise security conversation.",
+    content:[
+      {heading:"The Core Problem",body:"Enterprises are deploying AI at speed without understanding what data those systems can access, classify, or expose. At the same time, sensitive data is sprawling across multicloud environments, SaaS platforms, and on-premises systems — undiscovered, unclassified, and ungoverned. The result is a data attack surface growing faster than any security team can manually manage. Security leaders cannot protect what they cannot see, and they cannot govern what they cannot classify."},
+      {heading:"What Cyera Does",body:"Cyera is the AI-native data security platform that discovers, classifies, and protects sensitive data across the entire enterprise environment — cloud, on-premises, structured, and unstructured — in minutes, not months. With 95%+ classification precision and agentless deployment, Cyera gives security leaders complete visibility into their data attack surface and the tools to remediate risk before an incident occurs. Cyera was the first to converge DSPM, DLP, and identity into a single platform."},
+      {heading:"The Three-Part Value Framework",body:"Current State: What sensitive data does this organization have, where does it live, who can access it, and what AI systems are touching it right now — and do they actually know? Business Impact: What is the cost of that uncertainty — in regulatory exposure, breach liability, AI governance risk, and the security team hours spent manually investigating what an automated platform would surface instantly? Future State: What does it look like when this organization has complete data visibility, automated classification at scale, and the ability to remediate data risk before it becomes a breach or a regulatory finding?"},
+      {heading:"The ROI Framework",body:"Breach cost reduction: the average enterprise data breach costs $4.9M — Cyera reduces exposure by eliminating unknown data risk before an incident. Compliance readiness: automated classification and audit trails compress regulatory response time from weeks to hours. AI governance: enterprises deploying agentic AI without data visibility are accumulating governance risk that will compound as regulation tightens in 2026 and beyond. Security team efficiency: Cyera eliminates hours of manual data discovery and classification work per week across the security organization."},
+    ],
+    scenario:{
+      setup:"You are preparing for a discovery call with Visa Group, a $28B asset management firm. Their CISO mentioned in a pre-call email that their security team is struggling to understand what data their recently deployed Microsoft Copilot instance can access across their internal payment systems and cloud environments environments. They are also facing a regulatory examination in Q3 that will require them to demonstrate complete visibility into where cardholder data and sensitive financial records lives across their cloud infrastructure.",
+      task:"Write three things: (1) A two-sentence current state problem statement specific to Visa Group. (2) A quantified business impact estimate with your reasoning — include both the regulatory risk and the AI governance dimension. (3) A one-sentence future state tied to a specific Cyera outcome.",
+      rubric:[
+        {dimension:"Specificity",description:"Does the current state reference Meridian's actual situation — Microsoft Copilot exposure, internal payment systems and cloud environments, cardholder data and sensitive financial records — rather than generic language?",max:35},
+        {dimension:"Quantification",description:"Is the business impact specific with numbers across both the regulatory and AI governance dimensions? Is the reasoning transparent?",max:35},
+        {dimension:"Cyera Alignment",description:"Is the future state tied to a specific measurable Cyera outcome rather than a generic security capability statement?",max:30},
+      ],
+    },
+  },
+  {
+    id:"m2",
+    title:"Trigger Identification and Account Prioritization",
+    icon:"ti-target",
+    duration:"20 min",
+    passingScore:70,
+    description:"Learn to identify the seven primary Cyera business triggers and translate them into high-priority pursuit strategies for Majors accounts.",
+    content:[
+      {heading:"Why Triggers Matter in Security Sales",body:"Enterprise security leaders do not buy because a seller reached out. They buy because something changed — a regulatory deadline, a board mandate, an incident, an AI deployment — that made their current blind spots unacceptable. Your job is to identify that change before a formal RFP is issued and position Cyera as the answer before the evaluation begins."},
+      {heading:"The Seven Primary Cyera Triggers",body:"1. AI deployment creating uncontrolled data exposure — Microsoft Copilot, ChatGPT Enterprise, or agentic AI accessing sensitive data without governance controls in place. 2. Regulatory deadline — GDPR, CCPA, HIPAA, or SEC cybersecurity disclosure rules requiring demonstrated data visibility and classification. 3. Merger or acquisition creating unknown data sprawl — two environments, two data estates, no unified view of what sensitive data exists or where. 4. Ransomware or data breach event — incident response exposed unknown data stores that should have been classified and protected. 5. Board-mandated AI governance initiative — leadership committed publicly to responsible AI adoption and needs a data security foundation before proceeding. 6. Failed data discovery project — a previous attempt at manual classification or a legacy DLP tool that could not scale to the current environment. 7. Cloud migration creating new data exposure — data moved to cloud environments where existing on-premises controls no longer apply."},
+      {heading:"Majors Account Trigger Signals",body:"For companies over $1B in revenue, trigger signals appear in earnings calls, SEC filings, press releases, and LinkedIn. A new CISO hire with a mandate to modernize the security stack. A public commitment to AI adoption paired with no disclosed data governance program. A regulatory filing that references data privacy risk as a material concern. A press release announcing a major cloud migration or M&A transaction. Job postings for data governance, data classification, or AI security roles signal active investment."},
+      {heading:"Translating Triggers to Priority",body:"In the Majors segment, a trigger alone does not make an account a top priority. It must pair with relationship access — a path to the CISO, CDO, or CTO — and a fiscal calendar that supports a near-term decision. The strongest opportunities are accounts where a regulatory deadline creates a non-negotiable timeline, because those deals close on the regulator's schedule, not the customer's preference."},
+    ],
+    scenario:{
+      setup:"You have three Majors account profiles. Read each carefully and identify the primary Cyera trigger, explain the urgency it creates, and write a one-sentence outreach hook.\n\nAccount A — Wells Fargo: $82B revenue financial institution headquartered in San Francisco. Q1 earnings call transcript includes: 'We have deployed Microsoft Copilot across our commercial banking division and are actively working to ensure our data governance controls are commensurate with the capability.' New CISO hired three months ago from a cloud-native fintech. OCC examination scheduled for Q4.\n\nAccount B — Sutter Health: $15B integrated healthcare network headquartered in Sacramento, serving the greater Bay Area. Press release four weeks ago announced completion of a $1.8B acquisition of a regional hospital network. CTO quoted: 'Unifying our clinical data environments across both organizations is the defining technology priority for the next 18 months.' No known security contacts.\n\nAccount C — Levi Strauss and Co: $6.2B global apparel company headquartered in San Francisco. LinkedIn shows three new open roles for 'Cloud Data Security Engineer' and 'DSPM Analyst.' Warm relationship with VP of IT Security. Recent 10-K filing cited data privacy and cybersecurity risk as material concerns.",
+      task:"For each account: (1) Name the primary Cyera trigger. (2) Explain in one sentence why this creates urgency. (3) Write a one-sentence outreach hook that references the trigger without pitching the product.",
+      rubric:[
+        {dimension:"Trigger Accuracy",description:"Did the rep correctly identify the primary Cyera trigger for each account from the available signals?",max:35},
+        {dimension:"Urgency Framing",description:"Does the urgency explanation connect the trigger to a specific cost, deadline, or risk the organization cannot ignore?",max:35},
+        {dimension:"Outreach Hook Quality",description:"Are the outreach hooks specific, insight-led, and free of product pitching?",max:30},
+      ],
+    },
+  },
+  {
+    id:"m3",
+    title:"Discovery and Stakeholder Mapping",
+    icon:"ti-users",
+    duration:"25 min",
+    passingScore:70,
+    description:"Build multi-threaded stakeholder maps for complex security buying committees and run discovery that uncovers the full depth of a data security problem.",
+    content:[
+      {heading:"The Security Buying Committee",body:"Cyera deals involve a broader buying committee than most enterprise software. The CISO owns the technical mandate and often the budget. The CTO or CDO may own the AI governance dimension. Legal and Compliance own the regulatory risk framing. The CFO frames the breach cost and insurance exposure conversation. IT and Security Engineering evaluate the technical implementation. Understanding who plays which role — and who has the most urgency — determines your sequencing strategy."},
+      {heading:"The Five Stakeholder Roles",body:"Economic Buyer: the CISO or CDO who controls the budget and must approve a purchase of this size. They care about risk reduction, compliance posture, and board reporting. Technical Buyer: the Security Engineering or Cloud Security team that will evaluate the platform. They care about agentless deployment, API coverage, classification accuracy, and operational overhead. Champion: the person who has internal credibility, wants Cyera to win, and will coach you through the process. Blocker: IT leadership protecting incumbent tools, or Finance challenging the ROI. Influencer: Legal and Compliance, who shape the CISO's urgency around regulatory timelines without having formal budget authority."},
+      {heading:"Discovery Questions for Cyera",body:"Open with insight: 'We have been working with a number of financial services organizations on the data governance question that comes with Copilot deployments — most are finding the exposure is broader than they anticipated. Is that consistent with what your team is seeing?' Data estate discovery: 'If I asked you today to tell me every place PII lives across your cloud environment — how confident are you in that answer?' AI exposure: 'When your teams deployed Copilot or other AI tools, what was the process for validating what data those systems had access to?' Regulatory framing: 'With your Q4 examination approaching, what is the current state of your data classification documentation?' Impact quantification: 'If your team had to manually produce a full data inventory for the examiners today, how long would that take?'"},
+      {heading:"The Multi-Thread Imperative",body:"Security deals that live with only the CISO are the most fragile deals in enterprise sales. When the CISO leaves, changes priorities, or loses budget authority, a single-threaded deal dies. Before any opportunity is considered active, you must have the CISO or CDO identified as Economic Buyer, at least one member of Security Engineering engaged as Technical Buyer, and a Champion who has advocated for Cyera internally. Legal and Compliance as a secondary thread significantly improves close rates in regulatory-driven deals."},
+    ],
+    scenario:{
+      setup:"You are preparing for your second meeting at Transamerica, a $12B financial services and insurance company headquartered in San Francisco. You have a warm relationship with Sarah Park, VP of Cloud Security, who is enthusiastic about Cyera. You now have a meeting with the following five stakeholders: James Morton (CISO, has 20 minutes only), Sarah Park (VP Cloud Security — your contact), David Chen (VP of Legal and Compliance, focused on regulatory exposure), Mike Walsh (CFO, skeptical about security spend without clear ROI), and Priya Sharma (Chief Digital Officer, driving the company's AI adoption roadmap).",
+      task:"For each stakeholder: (1) Assign their role — Economic Buyer, Technical Buyer, Champion, Blocker, or Influencer. (2) Write one discovery question tailored specifically to their role and their likely priorities at a major financial services and insurance company managing a complex multicloud environment across AWS, Azure, and on-premises data centers.",
+      rubric:[
+        {dimension:"Role Accuracy",description:"Are the stakeholder roles correctly assigned based on the context and their likely positions at a major financial services and insurance company?",max:35},
+        {dimension:"Question Quality",description:"Are the discovery questions open-ended, role-specific, and likely to surface pain relevant to Cyera?",max:35},
+        {dimension:"Cyera Tailoring",description:"Do the questions connect to Cyera's specific value proposition rather than being generic security questions?",max:30},
+      ],
+    },
+  },
+  {
+    id:"m4",
+    title:"Competitive Positioning",
+    icon:"ti-sword",
+    duration:"20 min",
+    passingScore:70,
+    description:"Master Cyera's competitive landscape and the three most important competitive conversations — Microsoft Purview, Wiz, and BigID.",
+    content:[
+      {heading:"The Competitive Landscape",body:"Cyera competes across four categories. Native cloud provider tools: Microsoft Purview DSPM for AI, which covers Microsoft-native environments but lacks cross-cloud and external datastore coverage. Cloud security platforms expanding into DSPM: Wiz, which approaches from the CNAPP direction and has built DSPM capabilities into its broader cloud security graph. Data-centric security incumbents: BigID, which focuses on data discovery and privacy but lacks Cyera's AI-native classification precision and unified DSPM plus DLP plus identity platform. Internal build versus buy: security engineering teams that believe they can stitch together a data visibility solution from existing tools, underestimating the classification accuracy and maintenance burden."},
+      {heading:"The Microsoft Purview Conversation",body:"This is the most common competitive situation in the Fortune 500. The wrong response is to argue that Purview is inadequate. The right response is to acknowledge Purview as a strong tool within the Microsoft ecosystem and then surface the scope question: 'Purview DSPM for AI works well for data that lives in Microsoft environments. The question for most enterprises is — what percentage of your sensitive data actually lives in Microsoft tools?' For most large enterprises the answer is 30 to 50 percent. The other 50 to 70 percent lives in AWS, GCP, Snowflake, Databricks, on-premises databases, and SaaS platforms that Purview does not reach. That is where Cyera operates — and that is where the undiscovered risk concentrates."},
+      {heading:"The Wiz Conversation",body:"Wiz approaches data security from the cloud infrastructure direction. Their DSPM capabilities are real but secondary to their core CNAPP platform. The differentiation is depth versus breadth: 'Wiz gives you a broad view of your cloud security posture with data as one dimension. Cyera gives you the deepest possible view of your data security posture specifically — 95 percent plus classification precision, structured and unstructured data, cloud and on-premises, with DSPM and DLP unified in a single platform. If your primary mandate is data visibility and governance at enterprise scale, a platform built specifically for that problem will outperform one where data is one feature among many.'"},
+      {heading:"The BigID Conversation",body:"BigID is the most data-centric of the major competitors but lacks Cyera's AI-native classification engine, the DLP unification, and the identity layer. 'BigID built an excellent data discovery and privacy platform. The differentiation is what happens after discovery — Cyera's AI-native classification understands data in its full business context with 95 percent precision, unifies DSPM and DLP so you move from visibility to protection in the same platform, and integrates identity to show you not just what sensitive data exists but who and what AI systems are accessing it. That is the full picture a modern data security program requires.'"},
+    ],
+    scenario:{
+      setup:"You are in a discovery call with the VP of Cloud Security at Kaiser Permanente, an $11B integrated healthcare system headquartered in Oakland. The conversation has surfaced a clear data visibility problem — they have sensitive patient data in AWS, Azure, and three SaaS platforms that they cannot fully inventory. Then they say: 'We actually have a meeting with Microsoft next week about Purview. Our CTO is heavily committed to the Microsoft ecosystem and has suggested we start there before evaluating other vendors.'",
+      task:"Write your complete response to this competitive situation. Your response should acknowledge the Microsoft evaluation credibly without being defensive, pivot to a Cyera-specific differentiation relevant to an integrated health system with Epic, AWS, Azure, and on-premises data across 39 hospitals, and advance the conversation toward a parallel evaluation rather than a standoff.",
+      rubric:[
+        {dimension:"Credible Acknowledgment",description:"Did the rep acknowledge the Purview evaluation credibly without dismissing Microsoft or being defensive?",max:30},
+        {dimension:"Differentiation Clarity",description:"Was the Cyera differentiation specific, relevant to healthcare and multicloud data, and clearly distinct from Purview's scope?",max:40},
+        {dimension:"Conversation Advancement",description:"Did the rep propose a specific path forward that advances toward a parallel evaluation rather than leaving the conversation unresolved?",max:30},
+      ],
+    },
+  },
+  {
+    id:"m5",
+    title:"Objection Handling",
+    icon:"ti-shield",
+    duration:"20 min",
+    passingScore:70,
+    description:"Master the acknowledge, bridge, and advance framework for the five most common Cyera objections in the Majors segment.",
+    content:[
+      {heading:"The Acknowledge, Bridge, Advance Framework",body:"Acknowledge: validate the objection without agreeing with the conclusion. Security leaders have heard a lot of vendor pitches and they respect sellers who do not dismiss their concerns. Bridge: connect their concern to a Cyera-specific insight that reframes the objection without minimizing it. Advance: propose a specific next step that moves the conversation forward. Never let an objection end a meeting."},
+      {heading:"Objection 1 — We Already Have Tools That Cover This",body:"Acknowledge: 'That makes sense — most organizations at your scale have invested in security tooling and I would not suggest displacing what is working.' Bridge: 'The question we hear most often from CISOs in your position is not whether they have tools, but whether those tools give them complete visibility. Specifically — can you tell me today, with confidence, every place sensitive data lives in your cloud environment, who has access to it, and what AI systems are touching it? Most teams with existing tooling tell us the honest answer is no.' Advance: 'Would it be worth 20 minutes to see what Cyera surfaces in an environment like yours?'"},
+      {heading:"Objection 2 — We Do Not Have Budget for This Right Now",body:"Acknowledge: 'Budget timing is a real constraint and I respect that.' Bridge: 'The context I would offer is that the cost equation for data visibility shifts significantly when you factor in what a single undiscovered data exposure event costs — the average enterprise breach is $4.9M, and that is before regulatory penalties. Most CISOs we work with frame this as risk transfer rather than new spend. Is there a way to frame this as a risk reduction investment in your planning cycle?' Advance: 'When does your next planning cycle open? I want to make sure you have the right information to make that case internally if it is the right fit.'"},
+      {heading:"Objection 3 — We Are Not Ready — Our Data Environment Is Too Complex",body:"Acknowledge: 'Complexity is exactly the environment Cyera was built for — I hear this concern often and I want to address it directly.' Bridge: 'Cyera deploys agentlessly and begins scanning in minutes, not months. The complexity of your environment is not a prerequisite to fix before you get visibility — it is the reason you need automated classification rather than a manual approach. Our most complex customer environments are often the ones that see the fastest time to value because the gap between what they knew and what Cyera surfaces is the largest.' Advance: 'Would a technical proof of concept in your environment be the right next step to validate that?'"},
+      {heading:"Objection 4 — We Are Already Evaluating Wiz or BigID",body:"Acknowledge: 'Both are legitimate platforms and I would expect them to be in any thorough evaluation.' Bridge: 'The differentiation is depth versus breadth. Wiz approaches data security as one dimension of a broader cloud security platform. BigID is strong on data discovery and privacy. Cyera is the only platform built from the ground up to converge DSPM, DLP, and identity into a single data security engine with 95 percent plus classification precision across structured, unstructured, cloud, and on-premises data. If your primary mandate is data visibility and governance at enterprise scale, that specificity matters.' Advance: 'Most organizations running a parallel evaluation find value in including Cyera precisely because the depth of coverage surfaces things the other platforms miss. Would it make sense to include us in the evaluation?'"},
+      {heading:"Objection 5 — We Need to Wait for Our Cloud Migration to Complete",body:"Acknowledge: 'Cloud migrations create a natural tendency to want to sequence security after the infrastructure work is done — that instinct makes sense.' Bridge: 'The challenge is that the migration period is when data exposure risk is highest, not lowest. Data moves, copies accumulate, access controls do not always migrate cleanly, and sensitive data ends up in places nobody intended. Cyera's agentless architecture means you can deploy today and get visibility into the current state while the migration is underway — which often surfaces issues you want to address before they land in the new environment.' Advance: 'Would it be useful to see what Cyera surfaces in your current environment before the migration completes?'"},
+    ],
+    scenario:{
+      setup:"You are in a follow-up meeting at Franklin Templeton, a $9B asset management company headquartered in San Mateo. The CISO has been engaged but their VP of IT raises two objections back to back: 'Look, we already have Wiz deployed and our security team thinks it covers the data visibility use case. And even if we agreed with you, we are in the middle of a major cloud migration and I cannot ask my team to take on another deployment right now.'",
+      task:"Write your complete response handling both objections in sequence using the acknowledge, bridge, and advance framework. Your response should feel like a natural conversation, not a scripted rebuttal. Do not skip either objection.",
+      rubric:[
+        {dimension:"Acknowledgment Quality",description:"Did the rep acknowledge both objections genuinely without being defensive?",max:30},
+        {dimension:"Bridge Effectiveness",description:"Was each bridge specific to Cyera, relevant to financial services, and effective at reframing the objection?",max:40},
+        {dimension:"Conversation Advancement",description:"Did the rep advance past both objections with a clear specific next step?",max:30},
+      ],
+    },
+  },
+];
+
+/* ── REP PROFILES ──────────────────────────────────────────────── */
+const INITIAL_REPS=[
+  {
+    id:"r1",
+    name:"Alex Rivera",
+    role:"Strategic Seller",
+    territory:"Financial Services — Bay Area",
+    startDate:"2026-04-21",
+    dayInRamp:42,
+    avatar:"AR",
+    avatarColor:"#7c3aed",
+    moduleScores:{m1:84,m2:79,m3:null,m4:61,m5:null},
+    moduleAttempts:{m1:1,m2:1,m3:0,m4:2,m5:0},
+    presentationScores:[],
+    milestones:{
+      p1:{modules:true,presentation:false,shadowCalls:2,productCert:true,accountBrief:true,discoverCall:true},
+      p2:{objectionAssessment:false,firstMeetings:1,presentationAttempt2:false,accountPlans:0,managerDebrief:false},
+      p3:{qualifiedOpps:0,presentationAttempt3:false,territoryPlan:false,forecastCommit:false},
+    },
+    notes:"Strong foundation in value framework and trigger identification. Struggling with competitive positioning — two failed attempts on M4, specifically the Microsoft Purview objection. No presentation lab attempt at day 42. Priority: competitive deep-dive before any prospect conversation that surfaces Microsoft.",
+    managerFlags:["Competitive positioning gap — M4 failed twice on Purview objection","No presentation lab attempt at day 42","Only 1 first meeting booked — pipeline generation is behind pace"],
+  },
+  {
+    id:"r2",
+    name:"Jamie Okafor",
+    role:"Strategic Seller",
+    territory:"Healthcare and Life Sciences — Bay Area",
+    startDate:"2026-05-11",
+    dayInRamp:22,
+    avatar:"JO",
+    avatarColor:"#059669",
+    moduleScores:{m1:89,m2:83,m3:77,m4:null,m5:null},
+    moduleAttempts:{m1:1,m2:1,m3:1,m4:0,m5:0},
+    presentationScores:[72],
+    milestones:{
+      p1:{modules:false,presentation:true,shadowCalls:3,productCert:true,accountBrief:true,discoverCall:false},
+      p2:{objectionAssessment:false,firstMeetings:0,presentationAttempt2:false,accountPlans:0,managerDebrief:false},
+      p3:{qualifiedOpps:0,presentationAttempt3:false,territoryPlan:false,forecastCommit:false},
+    },
+    notes:"Exceptional progress for day 22. Strong assessment scores across all completed modules. Presentation lab score of 72 on first attempt is solid for this stage. M4 and M5 not yet started — schedule this week. On track to complete phase 1 ahead of schedule. Consider accelerating plan by two weeks.",
+    managerFlags:["On track — consider plan acceleration","M4 Competitive Positioning not yet started — schedule before first prospect conversation"],
+  },
+  {
+    id:"r3",
+    name:"Morgan Chen",
+    role:"Enterprise Seller",
+    territory:"Technology and Enterprise — Bay Area",
+    startDate:"2026-04-01",
+    dayInRamp:61,
+    avatar:"MC",
+    avatarColor:"#dc2626",
+    moduleScores:{m1:86,m2:81,m3:74,m4:78,m5:70},
+    moduleAttempts:{m1:1,m2:1,m3:1,m4:1,m5:1},
+    presentationScores:[59,66],
+    milestones:{
+      p1:{modules:true,presentation:true,shadowCalls:3,productCert:true,accountBrief:true,discoverCall:true},
+      p2:{objectionAssessment:true,firstMeetings:2,presentationAttempt2:true,accountPlans:1,managerDebrief:true},
+      p3:{qualifiedOpps:0,presentationAttempt3:false,territoryPlan:false,forecastCommit:false},
+    },
+    notes:"Strong knowledge scores across all five modules. Critical gap: zero qualified opportunities at day 61 — should have two in pipeline by now. Presentation scores improving (59 to 66) but below 80 target. The gap is prospecting activity and outreach volume, not product or messaging knowledge.",
+    managerFlags:["CRITICAL: Zero qualified opportunities at day 61","Presentation score improving but not at 80 target — schedule attempt 3 this week","Outreach volume is below benchmark — this is the coaching priority"],
+  },
+];
+
+/* ── 30/60/90 PLAN ─────────────────────────────────────────────── */
+const PLAN_PHASES=[
+  {
+    id:"p1",
+    label:"Phase 1",
+    days:"Days 1–30",
+    objective:"Foundation and Cyera Fluency",
+    color:"var(--cyera)",
+    actions:[
+      {day:1,  action:"Complete ARIA orientation and review the Cyera platform overview — DSPM, DLP, and identity convergence",type:"learning"},
+      {day:2,  action:"Complete Module 1 — The Cyera Value Framework. Target: 70%+ on assessment",type:"assessment"},
+      {day:3,  action:"Shadow a senior Strategic Seller on a CISO discovery call. Submit written debrief using the Cyera value framework",type:"activity"},
+      {day:5,  action:"Complete Module 2 — Trigger Identification and Account Prioritization",type:"assessment"},
+      {day:7,  action:"Complete your account intelligence brief for your top 3 Majors territory accounts",type:"activity"},
+      {day:8,  action:"Complete Module 3 — Discovery and Stakeholder Mapping for security buying committees",type:"assessment"},
+      {day:10, action:"Complete Cyera platform certification provided by the product and enablement team",type:"learning"},
+      {day:12, action:"Shadow a second discovery call. Focus on how the rep maps the security buying committee in real time",type:"activity"},
+      {day:14, action:"Complete Module 4 — Competitive Positioning. Focus on Purview, Wiz, and BigID responses",type:"assessment"},
+      {day:16, action:"Complete Module 5 — Objection Handling. Role-play the two-objection scenario with your manager",type:"assessment"},
+      {day:18, action:"Complete your first Presentation Lab attempt — the CISO discovery call scenario",type:"presentation"},
+      {day:20, action:"Third shadow call with a senior seller. Practice identifying stakeholder roles and trigger signals in real time",type:"activity"},
+      {day:22, action:"Complete first internal practice discovery call with your manager using a Majors account brief",type:"activity"},
+      {day:25, action:"Review manager feedback from presentation lab attempt 1. Identify your top two improvement areas",type:"learning"},
+      {day:28, action:"Complete account intelligence briefs for all priority accounts in territory",type:"activity"},
+      {day:30, action:"Phase 1 review with manager — walk through your territory thesis and top account prioritization",type:"milestone"},
+    ],
+  },
+  {
+    id:"p2",
+    label:"Phase 2",
+    days:"Days 31–60",
+    objective:"First CISO Conversations",
+    color:"var(--purple)",
+    actions:[
+      {day:32, action:"Launch outreach sequences for all priority Majors accounts — minimum 3 personalized touchpoints per account",type:"activity"},
+      {day:35, action:"Complete advanced objection handling assessment with manager. Target: 75%+",type:"assessment"},
+      {day:38, action:"Book first meeting with a real prospect — CISO, CDO, or VP of Security at any priority account",type:"milestone"},
+      {day:40, action:"Complete second Presentation Lab attempt. Target: improve score by 15+ points from attempt 1",type:"presentation"},
+      {day:42, action:"Submit account plans for two priority Majors accounts to manager for review",type:"activity"},
+      {day:45, action:"Debrief first prospect meeting with manager — stakeholder map, trigger identified, next step confirmed",type:"activity"},
+      {day:48, action:"Book second prospect meeting",type:"milestone"},
+      {day:52, action:"Complete manager-reviewed discovery call debrief — record a real prospect call and review together",type:"activity"},
+      {day:55, action:"Book third prospect meeting",type:"milestone"},
+      {day:58, action:"Review presentation lab attempt 2 feedback. Identify specific improvements for attempt 3",type:"learning"},
+      {day:60, action:"Phase 2 review with manager — pipeline progress, account plan quality, and presentation score trajectory",type:"milestone"},
+    ],
+  },
+  {
+    id:"p3",
+    label:"Phase 3",
+    days:"Days 61–90",
+    objective:"Pipeline and First Close",
+    color:"var(--green)",
+    actions:[
+      {day:62, action:"Confirm two qualified opportunities in pipeline — CISO or CDO engaged, trigger confirmed, next step active",type:"milestone"},
+      {day:65, action:"Complete third Presentation Lab attempt. Target: 80%+ score",type:"presentation"},
+      {day:68, action:"Executive sponsor introduction for top priority opportunity — Regional Director to CISO or CTO",type:"activity"},
+      {day:70, action:"Submit territory plan to Regional Director for formal review",type:"activity"},
+      {day:72, action:"Mutual action plan agreed and active with primary account champion",type:"activity"},
+      {day:75, action:"Economic buyer meeting completed for top opportunity — CISO or CDO presentation delivered",type:"milestone"},
+      {day:78, action:"Forecast commit submitted for the quarter — pipeline, commit, and best case",type:"milestone"},
+      {day:80, action:"Technical proof of concept initiated or proposal delivered to top opportunity",type:"activity"},
+      {day:85, action:"Deal review with Regional Director — opportunity health, competitive position, path to close",type:"activity"},
+      {day:88, action:"Second qualified opportunity at proposal or POC stage",type:"milestone"},
+      {day:90, action:"Full ramp review with Regional Director and third-line manager — achievements, gaps, Q4 territory strategy",type:"milestone"},
+    ],
+  },
+];
+
+/* ── PRESENTATION SCENARIO ─────────────────────────────────────── */
+const PRESENTATION_SCENARIO={
+  title:"CISO Discovery Call — Visa Inc.",
+  duration:15,
+  setup:"You are a Cyera Strategic Seller. You have a 15-minute introductory call with Karen Liu, CISO of Visa Inc., a $33B global payments technology company headquartered in Foster City. Karen agreed to the meeting but opened with: 'I have a hard stop in 15 minutes and I will be honest — I get three vendor calls a day. Tell me why this one is worth my time.'",
+  account:{
+    name:"Visa Inc.",
+    size:"$33B revenue | 26,500 employees | Foster City, CA",
+    environment:"AWS, GCP, Azure, on-premises data centers, Microsoft 365, Salesforce, internal payment processing systems",
+    trigger:"Microsoft Copilot deployed across product and engineering teams — data governance controls not yet validated. PCI DSS 4.0 compliance deadline approaching Q3. Board-level mandate to demonstrate AI governance before next annual report.",
+    stakeholders:"Karen Liu (CISO — Economic Buyer), David Park (VP Cloud Security — potential Champion), Sarah Morton (VP Legal and Compliance — Influencer on PCI and AI governance), Mike Torres (CFO — Blocker on incremental security spend)",
+  },
+  objectives:[
+    "Open with a specific business insight — not a product pitch",
+    "Run diagnostic discovery to uncover the data visibility gap",
+    "Handle the objection: 'We already have Microsoft Purview covering our data security'",
+    "Handle the objection: 'We are not ready to take on another security tool right now'",
+    "Close for a specific, dated next step",
+  ],
+  rubric:[
+    {dimension:"Opening and Point of View",description:"Did the rep open with a specific business insight relevant to Vertex rather than a product pitch? Did they earn relevance in the first 60 seconds?",max:20},
+    {dimension:"Discovery Quality",description:"Did they ask open-ended diagnostic questions? Did they uncover the specific data visibility gap — Copilot exposure, PCI DSS 4.0 deadline, multicloud environment?",max:20},
+    {dimension:"Cyera Value Alignment",description:"Did they connect Cyera's capabilities to Vertex's specific situation? Was the business case framed in the CISO's language — risk reduction, compliance, breach exposure?",max:20},
+    {dimension:"Objection Handling",description:"Did they handle both objections — Microsoft Purview and tool fatigue — using acknowledge, bridge, advance?",max:20},
+    {dimension:"Close and Next Step",description:"Did they close for a specific next step with a stakeholder, a topic, and a timeframe appropriate to a 15-minute first call?",max:20},
+  ],
+};
+
+/* ── DEMO MODE RESPONSES ───────────────────────────────────────── */
+const DEMO_EVAL={
+  total_score:83,
+  dimension_scores:[
+    {dimension:"Specificity",score:30,max:35,feedback:"The current state problem references Visa's specific situation — Microsoft Copilot deployment, internal payment systems and cloud environments exposure, cardholder data and sensitive financial records, and the Q3 PCI DSS 4.0 deadline. This level of specificity demonstrates genuine account preparation and will resonate with the CISO."},
+    {dimension:"Quantification",score:28,max:35,feedback:"The business impact covers both the regulatory dimension and the AI governance risk with specific numbers. To strengthen further, add the average time to respond to a regulatory data request without automated classification — most security teams estimate weeks, which creates a compelling contrast."},
+    {dimension:"Cyera Alignment",score:25,max:30,feedback:"The future state is tied to a specific Cyera outcome. To make it sharper, reference the 95% classification precision and the unified DSPM plus DLP capability rather than just visibility — that is the specific differentiation that matters for a financial services regulatory context."},
+  ],
+  overall_feedback:"Strong response that demonstrates genuine understanding of Visa's situation. The specificity of the current state problem and the dual-dimension impact framing — regulatory plus AI governance — are the two elements that will make this land with a CISO preparing for an PCI DSS 4.0 deadline. The future state framing is solid and can be sharpened with a Cyera-specific precision metric.",
+  top_strength:"Excellent framing of the AI governance risk dimension alongside the regulatory deadline. Most reps lead only with compliance — surfacing the Copilot data exposure as a parallel urgency demonstrates sophisticated understanding of the CISO's current priorities.",
+  top_improvement:"The future state needs a specific Cyera metric. Replace the generic visibility language with: 'Cyera classifies Meridian's full data estate at 95% precision in days, giving your team a defensible data inventory before the Q3 PCI DSS 4.0 deadline without a manual classification project.'",
+  passed:true
+};
+
+const DEMO_PRES={
+  total_score:76,
+  dimension_scores:[
+    {dimension:"Opening and Point of View",score:14,max:20,feedback:"The opening referenced Copilot deployments in financial services broadly but did not connect to Vertex's specific situation. The hook should reference the PCI DSS 4.0 deadline timing directly — that is the non-negotiable deadline that makes this conversation urgent for Karen Liu specifically."},
+    {dimension:"Discovery Quality",score:16,max:20,feedback:"Strong diagnostic questions throughout. The question about confidence in answering a full data inventory request was particularly effective — it surfaces the gap without leading with the product. Consider following the Copilot thread earlier rather than waiting for Karen to raise it."},
+    {dimension:"Cyera Value Alignment",score:16,max:20,feedback:"The connection between Cyera's cross-cloud coverage and Vertex's AWS, Azure, and on-premises environment was specific and relevant. This is exactly the right level of tailoring. Mentioning the 95% classification precision in the context of regulatory defensibility would strengthen the value framing."},
+    {dimension:"Objection Handling",score:16,max:20,feedback:"Both objections handled using acknowledge-bridge-advance. The Purview response was strong — the scope question about what percentage of data lives in Microsoft tools is the right reframe. The tool fatigue objection could have been more assertive about the OCC timeline making the status quo untenable."},
+    {dimension:"Close and Next Step",score:14,max:20,feedback:"The close proposed a follow-up conversation but did not name a specific stakeholder, topic, or timeframe. Replace with: 'Can we get 30 minutes with your VP of Cloud Security this week to run a preliminary scan of your AWS environment before the PCI DSS 4.0 deadline timeline tightens?'"},
+  ],
+  overall_feedback:"A strong first attempt that demonstrates solid product knowledge and genuine account preparation. The discovery section is the standout — the diagnostic questions uncovered the real depth of the data visibility problem without leading with the product. Two focused improvements will move this score above 80 in attempt 2: sharpen the opening to reference Vertex's specific OCC timeline, and replace the open-ended close with a specific ask naming a stakeholder and a timeframe.",
+  top_strength:"Discovery quality is genuinely strong. The progression from broad data visibility questions to the Copilot-specific exposure question is an effective diagnostic sequence that surfaces the full scope of the problem naturally.",
+  top_improvement:"The close needs to be specific and directional. Karen Liu has 15 minutes and an PCI DSS 4.0 deadline on the horizon — she needs a clear, easy next step with a named stakeholder and a timeframe, not an open invitation to continue the conversation.",
+  coaching_priorities:[
+    {priority:"Sharpen the opening",action:"Draft an opening statement that references Vertex's OCC Q4 examination and the Copilot deployment specifically in the first two sentences. Practice until it is natural and under 45 seconds."},
+    {priority:"Strengthen the close",action:"Write five specific next-step asks for this account — each naming a stakeholder, a topic, and a timeframe. Choose the one most appropriate to what was surfaced in discovery and practice asking for it directly."},
+  ],
+  passed:true
+};
+
+const DEMO_GAP={
+  cohort_health:"Yellow",
+  headline:"The cohort has strong product knowledge but a critical execution gap — Morgan Chen is at risk of missing Q3 quota contribution and requires immediate coaching intervention on prospecting activity.",
+  module_gaps:[
+    {module:"Competitive Positioning (M4)",issue:"Alex Rivera has failed twice — the Microsoft Purview objection specifically requires direct coaching before any CISO conversation surfaces Microsoft",affected_reps:["Alex Rivera"],recommended_action:"Schedule a 30-minute Purview competitive deep-dive with Alex before end of week — this is blocking first prospect conversations"},
+    {module:"Presentation Lab",issue:"Alex has not attempted the presentation lab at day 42 — this milestone is 12 days overdue and is a leading indicator of prospect-readiness",affected_reps:["Alex Rivera"],recommended_action:"Require presentation lab attempt before any unsupervised prospect meeting — set this as a condition of phase 2 progression"},
+  ],
+  individual_priorities:[
+    {rep:"Morgan Chen",priority:"Zero qualified opportunities at day 61 — prospecting volume and outreach activity is the gap, not product knowledge",urgency:"High"},
+    {rep:"Alex Rivera",priority:"Competitive positioning gap on Purview must be resolved before first CISO conversation",urgency:"High"},
+    {rep:"Jamie Okafor",priority:"On track and ahead of pace — consider accelerating 30/60/90 plan by two weeks",urgency:"Low"},
+  ],
+  team_recommendation:"This week's absolute priority is Morgan Chen. Strong scores with zero pipeline at day 61 is the most acute revenue risk on the team. The 1:1 this week should focus entirely on outreach activity — specific accounts, specific contacts, specific outreach attempts committed to by end of week. Alex Rivera's Purview gap is the second priority and can be addressed in a 30-minute team session rather than individual coaching, since every Strategic Seller will face this objection in the financial services and healthcare segments."
+};
+
+/* ── API ───────────────────────────────────────────────────────── */
+function extractJSON(text){
+  let s=text.replace(/```json|```/g,"").trim();
+  const st=s.indexOf("{"),en=s.lastIndexOf("}");
+  if(st===-1)throw new Error("No JSON found");
+  s=en===-1?s.slice(st):s.slice(st,en+1);
+  s=s.replace(/,(\s*[}\]])/g,"$1");
+  try{return JSON.parse(s);}
+  catch(e){
+    let opens=0,aopens=0;
+    for(const c of s){if(c==="{")opens++;else if(c==="}")opens--;else if(c==="[")aopens++;else if(c==="]")aopens--;}
+    while(aopens>0){s+="]";aopens--;}
+    while(opens>0){s+="}";opens--;}
+    return JSON.parse(s);
+  }
+}
+
+async function askClaude(system,user,maxTokens=1500){
+  const demoMode=!localStorage.getItem("aria_key")||localStorage.getItem("aria_demo")==="true";
+  if(demoMode){
+    await new Promise(r=>setTimeout(r,1800));
+    if(system.includes("presentation")||system.includes("transcript")){return JSON.stringify(DEMO_PRES);}
+    else if(system.includes("cohort")||system.includes("enablement director")){return JSON.stringify(DEMO_GAP);}
+    else{return JSON.stringify(DEMO_EVAL);}
+  }
+  const key=localStorage.getItem("aria_key");
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:maxTokens,system,messages:[{role:"user",content:user}]}),
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+  const data=await res.json();
+  const text=data.content?.[0]?.text||"";
+  if(!text)throw new Error("Empty response");
+  return text;
+}
+
+async function evaluateAssessment(module,scenario,response){
+  const system=`You are a world-class enterprise security sales coach evaluating a new Cyera Strategic Seller's assessment response. Cyera is an AI-native data security platform specializing in DSPM, DLP, and identity convergence. You are rigorous but constructive. Score each rubric dimension precisely. A passing score is 70/100. Return ONLY valid JSON: {total_score(number 0-100),dimension_scores:[{dimension,score,max,feedback(2-3 sentences specific to their response)}],overall_feedback(3-4 sentences),top_strength(1 sentence),top_improvement(1 sentence),passed(boolean)}.`;
+  const user=`Module: ${module.title}\nScenario: ${scenario.setup}\nTask: ${scenario.task}\nRubric: ${JSON.stringify(scenario.rubric)}\nRep Response: ${response}`;
+  return extractJSON(await askClaude(system,user,1200));
+}
+
+async function evaluatePresentation(transcript){
+  const system=`You are a world-class enterprise security sales coach evaluating a new Cyera Strategic Seller's recorded CISO discovery call. Cyera is an AI-native data security platform — DSPM, DLP, and identity convergence. Be rigorous and specific. Reference actual moments from the transcript. Return ONLY valid JSON: {total_score(number 0-100),dimension_scores:[{dimension,score,max,feedback(2-3 sentences referencing specific moments)}],overall_feedback(3-4 sentences),top_strength(1 sentence),top_improvement(1 sentence),coaching_priorities:[{priority,action}],passed(boolean where passing is 70+)}.`;
+  const user=`Scenario: ${JSON.stringify(PRESENTATION_SCENARIO)}\nTranscript: ${transcript}`;
+  return extractJSON(await askClaude(system,user,1500));
+}
+
+async function generateLearningGapAnalysis(reps){
+  const system=`You are an enterprise sales enablement director at Cyera analyzing a new Strategic Seller cohort's learning progress. Cyera sells AI-native DSPM to CISOs and CDOs at Majors accounts over $1B in revenue. Identify patterns, gaps, and coaching priorities. Be specific and actionable. Return ONLY valid JSON: {cohort_health(Green|Yellow|Red),headline(1 sentence),module_gaps:[{module,issue,affected_reps(array),recommended_action}],individual_priorities:[{rep,priority,urgency(High|Medium|Low)}],team_recommendation(2-3 sentences)}.`;
+  const user=`Rep data: ${JSON.stringify(reps.map(r=>({name:r.name,role:r.role,dayInRamp:r.dayInRamp,moduleScores:r.moduleScores,moduleAttempts:r.moduleAttempts,presentationScores:r.presentationScores,milestones:r.milestones,managerFlags:r.managerFlags})))}`;
+  return extractJSON(await askClaude(system,user,1000));
+}
+
+/* ── UI PRIMITIVES ─────────────────────────────────────────────── */
+function Spinner({size=14}){
+  return <span style={{display:"inline-block",width:size,height:size,border:"2px solid var(--bdr2)",borderTopColor:"var(--txt2)",borderRadius:"50%",animation:"spin 0.7s linear infinite",verticalAlign:"middle",marginRight:6}}/>;
+}
+
+function Badge({label,color="gray",size="sm"}){
+  const fs=size==="sm"?11:13,pad=size==="sm"?"2px 8px":"4px 12px";
+  const map={green:{bg:"var(--gbg)",tx:"var(--green)",bdr:"var(--gbdr)"},amber:{bg:"var(--abg)",tx:"var(--amber)",bdr:"var(--abdr)"},red:{bg:"var(--rbg)",tx:"var(--red)",bdr:"var(--rbdr)"},blue:{bg:"var(--glow)",tx:"var(--cyera)",bdr:"rgba(108,71,255,0.3)"},purple:{bg:"var(--pbg)",tx:"var(--purple)",bdr:"var(--pbdr)"},gray:{bg:"var(--bg3)",tx:"var(--txt2)",bdr:"var(--bdr)"}};
+  const c=map[color]||map.gray;
+  return <span style={{background:c.bg,color:c.tx,border:`1px solid ${c.bdr}`,fontSize:fs,fontWeight:500,padding:pad,borderRadius:4,whiteSpace:"nowrap"}}>{label}</span>;
+}
+
+function Card({children,style={}}){
+  return <div style={{background:"var(--card)",border:"1px solid var(--bdr)",borderRadius:"var(--r-lg)",padding:"1.25rem",...style}}>{children}</div>;
+}
+
+function Metric({label,value,sub,color,small=false}){
+  return <div style={{background:"var(--bg2)",borderRadius:"var(--r-md)",padding:small?"10px":"1rem"}}>
+    <p style={{fontSize:10,color:"var(--txt2)",margin:"0 0 4px",fontWeight:500,textTransform:"uppercase",letterSpacing:"0.6px"}}>{label}</p>
+    <p style={{fontSize:small?18:22,fontWeight:600,margin:"0 0 2px",color:color||"var(--txt1)"}}>{value}</p>
+    {sub&&<p style={{fontSize:10,color:"var(--txt2)",margin:0}}>{sub}</p>}
+  </div>;
+}
+
+function ProgressRing({score,size=64,stroke=5}){
+  const r=size/2-stroke;
+  const circ=2*Math.PI*r;
+  const color=score>=80?"var(--green)":score>=60?"var(--amber)":"var(--red)";
+  return <svg width={size} height={size} style={{flexShrink:0}}>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--bg3)" strokeWidth={stroke}/>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+      strokeDasharray={circ} strokeDashoffset={circ*(1-score/100)}
+      strokeLinecap="round" transform={`rotate(-90 ${size/2} ${size/2})`}
+      style={{transition:"stroke-dashoffset 0.6s ease"}}/>
+    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fontSize={size/4.5} fontWeight={600} fill={color}>{score}</text>
+  </svg>;
+}
+
+function ScoreBar({score,max=100,label,showNum=true}){
+  const pct=Math.round(score/max*100);
+  const color=pct>=80?"var(--green)":pct>=60?"var(--amber)":"var(--red)";
+  return <div style={{marginBottom:6}}>
+    {label&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+      <span style={{fontSize:11,color:"var(--txt2)"}}>{label}</span>
+      {showNum&&<span style={{fontSize:11,fontWeight:600,color}}>{score}/{max}</span>}
+    </div>}
+    <div style={{background:"var(--bg3)",borderRadius:4,height:6,overflow:"hidden"}}>
+      <div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:4,transition:"width 0.5s ease"}}/>
+    </div>
+  </div>;
+}
+
+function ErrBox({msg}){
+  if(!msg)return null;
+  return <div style={{padding:"10px 14px",background:"var(--rbg)",border:"1px solid var(--rbdr)",borderRadius:"var(--r-md)",fontSize:13,color:"var(--red)",marginBottom:"1rem",display:"flex",gap:8,alignItems:"flex-start"}}>
+    <i className="ti ti-alert-circle" style={{flexShrink:0,marginTop:1}}/><span>{msg}</span>
+  </div>;
+}
+
+function SectionHead({title,subtitle,right}){
+  return <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1.5rem"}}>
+    <div>
+      <h2 style={{fontSize:18,fontWeight:600,margin:"0 0 4px"}}>{title}</h2>
+      {subtitle&&<p style={{fontSize:13,color:"var(--txt2)",margin:0}}>{subtitle}</p>}
+    </div>
+    {right&&<div style={{flexShrink:0,marginLeft:16}}>{right}</div>}
+  </div>;
+}
+
+function Tabs({tabs,active,onChange}){
+  return <div style={{display:"flex",gap:2,borderBottom:"1px solid var(--bdr)",marginBottom:"1.5rem",flexWrap:"wrap"}}>
+    {tabs.map(t=><button key={t.id} onClick={()=>onChange(t.id)} style={{fontSize:13,padding:"8px 16px",borderRadius:"var(--r-md) var(--r-md) 0 0",background:active===t.id?"var(--card)":"transparent",border:active===t.id?"1px solid var(--bdr)":"1px solid transparent",borderBottom:active===t.id?"1px solid var(--card)":"1px solid transparent",fontWeight:active===t.id?600:400,color:active===t.id?"var(--txt1)":"var(--txt2)",display:"flex",alignItems:"center",gap:6}}>
+      {t.icon&&<i className={`ti ${t.icon}`} style={{fontSize:14}}/>}{t.label}
+    </button>)}
+  </div>;
+}
+
+function Avatar({initials,color,size=36}){
+  return <div style={{width:size,height:size,borderRadius:"50%",background:color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.33,fontWeight:700,color:"#fff",flexShrink:0}}>{initials}</div>;
+}
+
+function calcHealth(rep){
+  const scores=Object.values(rep.moduleScores).filter(s=>s!==null);
+  const avgScore=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0;
+  const completion=scores.length/Object.keys(rep.moduleScores).length;
+  const presScore=rep.presentationScores.length?rep.presentationScores[rep.presentationScores.length-1]:0;
+  const p1Keys=Object.keys(rep.milestones.p1);
+  const p1Done=p1Keys.filter(k=>rep.milestones.p1[k]===true||(typeof rep.milestones.p1[k]==="number"&&rep.milestones.p1[k]>0)).length;
+  const milestoneScore=(p1Done/p1Keys.length)*100;
+  return Math.min(100,Math.max(0,Math.round(avgScore*0.3+completion*100*0.3+milestoneScore*0.2+(presScore||0)*0.2)));
+}
+
+function healthColor(score){return score>=75?"green":score>=55?"amber":"red";}
+function healthLabel(score){return score>=75?"On Track":score>=55?"Watch":"Needs Attention";}
+
+/* ── API KEY GATE ──────────────────────────────────────────────── */
+function ApiKeyGate({children}){
+  const [key,setKey]=useState(()=>localStorage.getItem("aria_key")||localStorage.getItem("aria_demo")||"");
+  const [input,setInput]=useState("");
+  const [err,setErr]=useState("");
+  function save(){
+    if(!input.startsWith("sk-")){setErr("Key must start with sk-");return;}
+    localStorage.setItem("aria_key",input);setKey(input);
+  }
+  function launchDemo(){
+    localStorage.setItem("aria_demo","true");
+    setKey("demo");
+  }
+  if(key)return children;
+  return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"var(--bg)",padding:"2rem"}}>
+    <Card style={{maxWidth:480,width:"100%"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:"1.5rem"}}>
+        <div style={{width:46,height:46,background:"linear-gradient(135deg,var(--cyera),var(--purple))",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <i className="ti ti-shield-lock" style={{color:"#fff",fontSize:22}}/>
+        </div>
+        <div>
+          <p style={{fontWeight:700,fontSize:17,margin:0}}>ARIA</p>
+          <p style={{fontSize:12,color:"var(--txt2)",margin:0}}>Accelerated Rep Intelligence Agent</p>
+        </div>
+      </div>
+      <div style={{padding:"14px",background:"var(--bg2)",borderRadius:"var(--r-md)",marginBottom:"1.5rem",borderLeft:"3px solid var(--cyera)"}}>
+        <p style={{fontSize:12,color:"var(--txt2)",margin:"0 0 4px"}}>Business case at $1.8M quota | 20-rep hiring class</p>
+        <p style={{fontSize:16,fontWeight:700,color:"var(--cyera)",margin:0}}>${(ROI.TOTAL_RECOVERABLE/1e6).toFixed(1)}M recoverable quota capacity from cutting ramp in half</p>
+      </div>
+      <ErrBox msg={err}/>
+      <label>Anthropic API Key</label>
+      <input type="password" placeholder="sk-ant-api03-..." value={input} onChange={e=>{setInput(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&save()} style={{marginBottom:"1rem"}}/>
+      <button className="primary" onClick={save} style={{width:"100%",padding:"10px",fontSize:14,marginBottom:10}}>
+        <i className="ti ti-arrow-right" style={{marginRight:6}}/>Launch with API Key
+      </button>
+      <button onClick={launchDemo} style={{width:"100%",padding:"10px",fontSize:14,marginBottom:10,background:"var(--bg3)",borderColor:"var(--cyera)",color:"var(--cyera)"}}>
+        <i className="ti ti-eye" style={{marginRight:6}}/>Launch Demo Mode — No API Key Required
+      </button>
+      <p style={{fontSize:11,color:"var(--txt3)",marginTop:4,textAlign:"center"}}>Demo mode uses pre-loaded AI responses · All features fully navigable</p>
+    </Card>
+  </div>;
+}
+
+/* ── ROLE TOGGLE ───────────────────────────────────────────────── */
+function RoleToggle({role,setRole}){
+  return <div style={{display:"flex",background:"var(--bg2)",borderRadius:"var(--r-md)",padding:3,border:"1px solid var(--bdr)"}}>
+    {["manager","rep"].map(r=><button key={r} onClick={()=>setRole(r)} style={{padding:"6px 16px",fontSize:12,fontWeight:role===r?600:400,background:role===r?"var(--cyera)":"transparent",color:role===r?"#fff":"var(--txt2)",border:"none",borderRadius:"var(--r-sm)",textTransform:"capitalize"}}>{r==="manager"?"Manager View":"Rep View"}</button>)}
+  </div>;
+}
+
+/* ── MANAGER DASHBOARD ─────────────────────────────────────────── */
+function ManagerDashboard({reps,onSelectRep,selectedRep,onNav}){
+  const [gapAnalysis,setGapAnalysis]=useState(null);
+  const [genBusy,setGenBusy]=useState(false);
+  const [genErr,setGenErr]=useState("");
+
+  const onTrack=reps.filter(r=>healthColor(calcHealth(r))==="green").length;
+  const atRisk=reps.filter(r=>healthColor(calcHealth(r))==="red").length;
+  const avgHealth=Math.round(reps.reduce((s,r)=>s+calcHealth(r),0)/reps.length);
+
+  async function genGapAnalysis(){
+    setGenBusy(true);setGenErr("");
+    try{const r=await generateLearningGapAnalysis(reps);setGapAnalysis(r);}
+    catch(e){setGenErr(e.message);}
+    setGenBusy(false);
+  }
+
+  return <div className="fade-in">
+    <SectionHead title="Manager Dashboard" subtitle="Cohort health, pipeline risk, and AI-generated coaching priorities"
+      right={<div style={{padding:"8px 14px",background:"var(--bg2)",border:"1px solid var(--bdr)",borderRadius:"var(--r-md)"}}>
+        <p style={{fontSize:10,color:"var(--txt2)",margin:"0 0 2px"}}>RECOVERABLE QUOTA CAPACITY</p>
+        <p style={{fontSize:15,fontWeight:700,color:"var(--cyera)",margin:0}}>${(ROI.TOTAL_RECOVERABLE/1e6).toFixed(1)}M</p>
+      </div>}
+    />
+
+    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:"1.5rem"}}>
+      <Metric label="Quota Capacity / Mo / Rep" value="$150K" sub="Per month of ramp saved"/>
+      <Metric label="Avg Industry Ramp" value={`${ROI.AVG_RAMP_MONTHS} mo`} sub="Without structured onboarding"/>
+      <Metric label="ARIA Target Ramp" value={`${ROI.TARGET_RAMP_MONTHS} mo`} sub="With AI-assisted onboarding" color="var(--green)"/>
+      <Metric label="Quota Capacity Recovered" value={`$${(ROI.REVENUE_PER_REP/1000).toFixed(0)}K`} sub="Per rep per ramp cycle" color="var(--cyera)"/>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:"1.5rem"}}>
+      <Metric label="Active Reps" value={reps.length} sub="In ramp program"/>
+      <Metric label="On Track" value={onTrack} sub="Health score 75%+" color="var(--green)"/>
+      <Metric label="Needs Attention" value={atRisk} sub="Health score below 55%" color="var(--red)"/>
+      <Metric label="Avg Cohort Health" value={`${avgHealth}%`} sub="Across all reps" color={avgHealth>=75?"var(--green)":avgHealth>=55?"var(--amber)":"var(--red)"}/>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:"1.5rem"}}>
+      {reps.map(rep=>{
+        const health=calcHealth(rep);
+        const hc=healthColor(health);
+        const hl=healthLabel(health);
+        const isSelected=selectedRep===rep.id;
+        const scores=Object.values(rep.moduleScores).filter(s=>s!==null);
+        const avgScore=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+        const modsComplete=scores.length;
+        const lastPres=rep.presentationScores.length?rep.presentationScores[rep.presentationScores.length-1]:null;
+        return <div key={rep.id} onClick={()=>onSelectRep(isSelected?null:rep.id)}
+          style={{background:"var(--card)",border:`2px solid ${isSelected?"var(--cyera)":"var(--bdr)"}`,borderRadius:"var(--r-lg)",padding:"1rem",cursor:"pointer",transition:"all 0.15s",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:hc==="green"?"var(--green)":hc==="amber"?"var(--amber)":"var(--red)"}}/>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,paddingTop:4}}>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}>
+              <Avatar initials={rep.avatar} color={rep.avatarColor}/>
+              <div>
+                <p style={{fontWeight:600,margin:"0 0 1px",fontSize:14}}>{rep.name}</p>
+                <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{rep.role}</p>
+                <p style={{fontSize:10,color:"var(--txt3)",margin:0}}>{rep.territory}</p>
+              </div>
+            </div>
+            <ProgressRing score={health} size={52} stroke={4}/>
+          </div>
+          <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+            <Badge label={hl} color={hc}/>
+            <Badge label={`Day ${rep.dayInRamp}`} color="gray"/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:10}}>
+            <div style={{background:"var(--bg2)",borderRadius:"var(--r-sm)",padding:"6px",textAlign:"center"}}>
+              <p style={{fontSize:14,fontWeight:700,margin:0,color:modsComplete>=4?"var(--green)":modsComplete>=2?"var(--amber)":"var(--red)"}}>{modsComplete}/5</p>
+              <p style={{fontSize:9,color:"var(--txt2)",margin:0}}>Modules</p>
+            </div>
+            <div style={{background:"var(--bg2)",borderRadius:"var(--r-sm)",padding:"6px",textAlign:"center"}}>
+              <p style={{fontSize:14,fontWeight:700,margin:0,color:avgScore>=75?"var(--green)":avgScore>=60?"var(--amber)":avgScore>0?"var(--red)":"var(--txt3)"}}>{avgScore||"—"}</p>
+              <p style={{fontSize:9,color:"var(--txt2)",margin:0}}>Avg Score</p>
+            </div>
+            <div style={{background:"var(--bg2)",borderRadius:"var(--r-sm)",padding:"6px",textAlign:"center"}}>
+              <p style={{fontSize:14,fontWeight:700,margin:0,color:lastPres>=75?"var(--green)":lastPres>=60?"var(--amber)":lastPres?"var(--red)":"var(--txt3)"}}>{lastPres||"—"}</p>
+              <p style={{fontSize:9,color:"var(--txt2)",margin:0}}>Pres Lab</p>
+            </div>
+          </div>
+          {rep.managerFlags.length>0&&<div style={{background:"var(--abg)",border:"1px solid var(--abdr)",borderRadius:"var(--r-sm)",padding:"6px 8px"}}>
+            <p style={{fontSize:10,color:"var(--amber)",margin:"0 0 2px",fontWeight:600}}>⚠ {rep.managerFlags.length} FLAG{rep.managerFlags.length>1?"S":""}</p>
+            <p style={{fontSize:10,color:"var(--txt2)",margin:0}}>{rep.managerFlags[0]}</p>
+          </div>}
+          {isSelected&&<button onClick={e=>{e.stopPropagation();onNav("training");}} className="primary" style={{width:"100%",marginTop:10,fontSize:11,padding:"6px"}}>View Full Profile ↗</button>}
+        </div>;
+      })}
+    </div>
+
+    <Card>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem"}}>
+        <div>
+          <p style={{fontWeight:600,fontSize:14,margin:"0 0 2px"}}>AI Learning Gap Analysis</p>
+          <p style={{fontSize:12,color:"var(--txt2)",margin:0}}>AI-generated coaching priorities across the cohort</p>
+        </div>
+        <button className="primary" onClick={genGapAnalysis} disabled={genBusy} style={{fontSize:12}}>
+          {genBusy?<><Spinner/>Analyzing...</>:<><i className="ti ti-sparkles" style={{marginRight:4}}/>Generate Analysis</>}
+        </button>
+      </div>
+      <ErrBox msg={genErr}/>
+      {!gapAnalysis&&!genBusy&&<div style={{textAlign:"center",padding:"2rem",color:"var(--txt2)"}}>
+        <i className="ti ti-chart-bar" style={{fontSize:36,display:"block",marginBottom:8}}/>
+        <p style={{fontSize:13}}>Click to generate AI learning gap analysis across all reps</p>
+      </div>}
+      {gapAnalysis&&<div className="fade-in">
+        <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:"1rem"}}>
+          <Badge label={`Cohort Health: ${gapAnalysis.cohort_health}`} color={gapAnalysis.cohort_health==="Green"?"green":gapAnalysis.cohort_health==="Yellow"?"amber":"red"} size="md"/>
+          <p style={{fontSize:13,color:"var(--txt2)",margin:0}}>{gapAnalysis.headline}</p>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:"1rem"}}>
+          <div>
+            <p style={{fontSize:11,fontWeight:600,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Module Gaps</p>
+            {gapAnalysis.module_gaps?.map((g,i)=><div key={i} style={{padding:"8px",background:"var(--bg2)",borderRadius:"var(--r-sm)",marginBottom:6,borderLeft:"3px solid var(--amber)"}}>
+              <p style={{fontWeight:600,fontSize:12,margin:"0 0 2px"}}>{g.module}</p>
+              <p style={{fontSize:11,color:"var(--txt2)",margin:"0 0 3px"}}>{g.issue}</p>
+              <p style={{fontSize:10,color:"var(--amber)",margin:0}}>Reps: {g.affected_reps?.join(", ")}</p>
+            </div>)}
+          </div>
+          <div>
+            <p style={{fontSize:11,fontWeight:600,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Individual Priorities</p>
+            {gapAnalysis.individual_priorities?.map((p,i)=><div key={i} style={{padding:"8px",background:"var(--bg2)",borderRadius:"var(--r-sm)",marginBottom:6,borderLeft:`3px solid ${p.urgency==="High"?"var(--red)":p.urgency==="Medium"?"var(--amber)":"var(--green)"}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                <p style={{fontWeight:600,fontSize:12,margin:0}}>{p.rep}</p>
+                <Badge label={p.urgency} color={p.urgency==="High"?"red":p.urgency==="Medium"?"amber":"green"}/>
+              </div>
+              <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{p.priority}</p>
+            </div>)}
+          </div>
+        </div>
+        <div style={{padding:"12px",background:"var(--glow)",border:"1px solid rgba(108,71,255,0.2)",borderRadius:"var(--r-md)",borderLeft:"3px solid var(--cyera)"}}>
+          <p style={{fontSize:11,fontWeight:600,color:"var(--cyera)",margin:"0 0 4px"}}>THIS WEEK'S MANAGER RECOMMENDATION</p>
+          <p style={{fontSize:13,margin:0,lineHeight:1.6}}>{gapAnalysis.team_recommendation}</p>
+        </div>
+      </div>}
+    </Card>
+  </div>;
+}
+
+/* ── REP DASHBOARD ─────────────────────────────────────────────── */
+function RepDashboard({rep,onNav}){
+  const health=calcHealth(rep);
+  const scores=Object.values(rep.moduleScores).filter(s=>s!==null);
+  const avgScore=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const modsComplete=scores.length;
+  const lastPres=rep.presentationScores.length?rep.presentationScores[rep.presentationScores.length-1]:null;
+  const currentPhase=rep.dayInRamp<=30?"p1":rep.dayInRamp<=60?"p2":"p3";
+  const phase=PLAN_PHASES.find(p=>p.id===currentPhase);
+  const todayActions=phase?.actions.filter(a=>a.day<=rep.dayInRamp&&a.day>=rep.dayInRamp-3).slice(0,3)||[];
+
+  return <div className="fade-in">
+    <SectionHead title={`Welcome back, ${rep.name.split(" ")[0]}`} subtitle={`Day ${rep.dayInRamp} of 90 — ${phase?.objective}`}/>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 3fr",gap:"1.5rem",marginBottom:"1.5rem"}}>
+      <Card style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
+        <ProgressRing score={health} size={88} stroke={7}/>
+        <div style={{textAlign:"center"}}>
+          <p style={{fontSize:11,fontWeight:600,color:"var(--txt2)",margin:"0 0 2px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Ramp Health</p>
+          <Badge label={healthLabel(health)} color={healthColor(health)} size="md"/>
+        </div>
+      </Card>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+        <Metric label="Day in Ramp" value={rep.dayInRamp} sub="of 90 days" small/>
+        <Metric label="Modules Complete" value={`${modsComplete}/5`} sub={modsComplete===5?"All done!":"Keep going"} color={modsComplete===5?"var(--green)":undefined} small/>
+        <Metric label="Avg Assessment" value={avgScore||"—"} sub="Target: 70%+" color={avgScore>=70?"var(--green)":avgScore>0?"var(--red)":undefined} small/>
+        <Metric label="Presentation Lab" value={lastPres||"—"} sub={rep.presentationScores.length?`Attempt ${rep.presentationScores.length}`:"Not started"} color={lastPres>=75?"var(--green)":lastPres?"var(--amber)":undefined} small/>
+      </div>
+    </div>
+
+    <Card style={{marginBottom:"1.5rem",borderLeft:"3px solid var(--cyera)"}}>
+      <p style={{fontWeight:600,fontSize:14,margin:"0 0 10px"}}>
+        <i className="ti ti-bolt" style={{marginRight:6,color:"var(--cyera)"}}/>Today's Priority Actions
+      </p>
+      {todayActions.length===0&&<p style={{fontSize:13,color:"var(--txt2)"}}>You are caught up — check your 30/60/90 plan for upcoming milestones.</p>}
+      {todayActions.map((a,i)=><div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<todayActions.length-1?"1px solid var(--bdr)":"none",alignItems:"flex-start"}}>
+        <div style={{width:22,height:22,borderRadius:"50%",background:a.type==="assessment"?"var(--pbg)":a.type==="presentation"?"var(--glow)":a.type==="milestone"?"var(--gbg)":"var(--bg3)",border:`1px solid ${a.type==="assessment"?"var(--pbdr)":a.type==="presentation"?"rgba(108,71,255,0.3)":a.type==="milestone"?"var(--gbdr)":"var(--bdr)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <i className={`ti ${a.type==="assessment"?"ti-clipboard-check":a.type==="presentation"?"ti-video":a.type==="milestone"?"ti-flag":"ti-check"}`} style={{fontSize:11,color:a.type==="assessment"?"var(--purple)":a.type==="presentation"?"var(--cyera)":a.type==="milestone"?"var(--green)":"var(--txt2)"}}/>
+        </div>
+        <div style={{flex:1}}>
+          <p style={{fontSize:13,margin:"0 0 2px"}}>{a.action}</p>
+          <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>Day {a.day}</p>
+        </div>
+        <button onClick={()=>onNav(a.type==="assessment"||a.type==="learning"?"training":a.type==="presentation"?"presentation":"plan")} style={{fontSize:11,padding:"4px 10px"}}>Go ↗</button>
+      </div>)}
+    </Card>
+
+    <Card style={{marginBottom:"1.5rem"}}>
+      <p style={{fontWeight:600,fontSize:14,margin:"0 0 12px"}}>Module Progress</p>
+      {MODULES.map(m=>{
+        const score=rep.moduleScores[m.id];
+        const attempts=rep.moduleAttempts[m.id];
+        const passed=score!==null&&score>=m.passingScore;
+        return <div key={m.id} style={{display:"flex",gap:12,padding:"8px 0",borderBottom:"1px solid var(--bdr)",alignItems:"center"}}>
+          <div style={{width:32,height:32,borderRadius:"var(--r-sm)",background:passed?"var(--gbg)":score?"var(--rbg)":"var(--bg2)",border:`1px solid ${passed?"var(--gbdr)":score?"var(--rbdr)":"var(--bdr)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <i className={`ti ${passed?"ti-check":score?"ti-x":"ti-lock"}`} style={{fontSize:14,color:passed?"var(--green)":score?"var(--red)":"var(--txt3)"}}/>
+          </div>
+          <div style={{flex:1}}>
+            <p style={{fontSize:13,fontWeight:500,margin:"0 0 2px"}}>{m.title}</p>
+            <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{m.duration} · {attempts?`${attempts} attempt${attempts>1?"s":""}`:attempts===0?"Not started":"—"}</p>
+          </div>
+          <div style={{textAlign:"right"}}>
+            {score!==null?<><p style={{fontSize:14,fontWeight:700,margin:0,color:passed?"var(--green)":"var(--red)"}}>{score}</p><p style={{fontSize:10,color:"var(--txt2)",margin:0}}>{passed?"Passed":"Needs retry"}</p></>:<Badge label="Not started" color="gray"/>}
+          </div>
+          <button onClick={()=>onNav("training")} style={{fontSize:11,padding:"4px 10px"}}>{score?"Review":"Start"} ↗</button>
+        </div>;
+      })}
+    </Card>
+
+    {rep.notes&&<Card style={{borderLeft:"3px solid var(--purple)"}}>
+      <p style={{fontWeight:600,fontSize:13,margin:"0 0 6px",color:"var(--purple)"}}>Manager Notes</p>
+      <p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{rep.notes}</p>
+    </Card>}
+  </div>;
+}
+
+/* ── PLAN VIEW ─────────────────────────────────────────────────── */
+function PlanView({rep}){
+  const [activePhase,setActivePhase]=useState(rep.dayInRamp<=30?"p1":rep.dayInRamp<=60?"p2":"p3");
+  const phase=PLAN_PHASES.find(p=>p.id===activePhase);
+  const completedDays=rep.dayInRamp;
+
+  return <div className="fade-in">
+    <SectionHead title="30 / 60 / 90 Day Ramp Plan" subtitle={`${rep.name} — Day ${rep.dayInRamp} of 90`}/>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:"1.5rem"}}>
+      {PLAN_PHASES.map(p=>{
+        const isActive=activePhase===p.id;
+        const isCurrent=(p.id==="p1"&&rep.dayInRamp<=30)||(p.id==="p2"&&rep.dayInRamp>30&&rep.dayInRamp<=60)||(p.id==="p3"&&rep.dayInRamp>60);
+        return <button key={p.id} onClick={()=>setActivePhase(p.id)} style={{padding:"12px",textAlign:"left",background:isActive?"var(--bg2)":"var(--card)",border:`2px solid ${isActive?p.color:"var(--bdr)"}`,borderRadius:"var(--r-lg)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+            <span style={{fontSize:12,fontWeight:700,color:p.color}}>{p.label}</span>
+            {isCurrent&&<Badge label="Current" color="blue"/>}
+          </div>
+          <p style={{fontSize:13,fontWeight:600,margin:"0 0 2px"}}>{p.days}</p>
+          <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{p.objective}</p>
+        </button>;
+      })}
+    </div>
+    <Card>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem"}}>
+        <div>
+          <p style={{fontWeight:700,fontSize:16,margin:"0 0 2px",color:phase.color}}>{phase.label} — {phase.objective}</p>
+          <p style={{fontSize:12,color:"var(--txt2)",margin:0}}>{phase.days}</p>
+        </div>
+      </div>
+      {phase.actions.map((action,i)=>{
+        const isPast=action.day<completedDays;
+        const isCurrent=action.day>=completedDays&&action.day<=completedDays+3;
+        const isFuture=action.day>completedDays+3;
+        const typeMap={learning:{icon:"ti-book",color:"var(--cyera)"},assessment:{icon:"ti-clipboard-check",color:"var(--purple)"},activity:{icon:"ti-activity",color:"var(--green)"},presentation:{icon:"ti-video",color:"var(--amber)"},milestone:{icon:"ti-flag",color:"var(--red)"}};
+        const tc=typeMap[action.type]||typeMap.activity;
+        return <div key={i} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:i<phase.actions.length-1?"1px solid var(--bdr)":"none",opacity:isFuture?0.5:1,alignItems:"flex-start"}}>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0,width:48}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:isPast?"var(--gbg)":isCurrent?"var(--glow)":"var(--bg2)",border:`2px solid ${isPast?"var(--gbdr)":isCurrent?"var(--cyera)":"var(--bdr)"}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {isPast?<i className="ti ti-check" style={{fontSize:14,color:"var(--green)"}}/>:<i className={`ti ${tc.icon}`} style={{fontSize:14,color:isCurrent?tc.color:"var(--txt3)"}}/>}
+            </div>
+            <p style={{fontSize:10,color:"var(--txt3)",margin:"4px 0 0",textAlign:"center"}}>Day {action.day}</p>
+          </div>
+          <div style={{flex:1,paddingTop:4}}>
+            {isCurrent&&<p style={{fontSize:10,fontWeight:600,color:"var(--cyera)",margin:"0 0 3px",textTransform:"uppercase",letterSpacing:"0.5px"}}>→ Current Priority</p>}
+            <p style={{fontSize:13,margin:"0 0 2px",fontWeight:isCurrent?500:400}}>{action.action}</p>
+            <Badge label={action.type.charAt(0).toUpperCase()+action.type.slice(1)} color={action.type==="assessment"?"purple":action.type==="presentation"?"amber":action.type==="milestone"?"red":action.type==="activity"?"green":"blue"}/>
+          </div>
+        </div>;
+      })}
+    </Card>
+  </div>;
+}
+
+/* ── TRAINING CENTER ───────────────────────────────────────────── */
+function TrainingCenter({rep,onScoreUpdate}){
+  const [activeModule,setActiveModule]=useState(null);
+  const [moduleTab,setModuleTab]=useState("content");
+  const [response,setResponse]=useState("");
+  const [evaluating,setEvaluating]=useState(false);
+  const [evaluation,setEvaluation]=useState(null);
+  const [err,setErr]=useState("");
+
+  async function submitAssessment(){
+    if(response.trim().length<50){setErr("Please provide a more complete response before submitting.");return;}
+    setEvaluating(true);setErr("");setEvaluation(null);
+    try{const result=await evaluateAssessment(activeModule,activeModule.scenario,response);setEvaluation(result);onScoreUpdate(activeModule.id,result.total_score);}
+    catch(e){setErr(e.message);}
+    setEvaluating(false);
+  }
+
+  if(activeModule){
+    const prevScore=rep.moduleScores[activeModule.id];
+    const attempts=rep.moduleAttempts[activeModule.id]||0;
+    const passed=prevScore!==null&&prevScore>=activeModule.passingScore;
+    return <div className="fade-in">
+      <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:"1.5rem"}}>
+        <button onClick={()=>{setActiveModule(null);setEvaluation(null);setResponse("");setModuleTab("content");}} style={{fontSize:12,padding:"6px 12px"}}><i className="ti ti-arrow-left" style={{marginRight:4}}/>Back</button>
+        <div style={{flex:1}}>
+          <p style={{fontWeight:600,fontSize:16,margin:0}}>{activeModule.title}</p>
+          <p style={{fontSize:12,color:"var(--txt2)",margin:0}}>{activeModule.duration} · {attempts} prior attempt{attempts!==1?"s":""}{prevScore!==null?` · Best score: ${prevScore}`:""}</p>
+        </div>
+        {prevScore!==null&&<Badge label={passed?"Passed":"Needs Retry"} color={passed?"green":"red"} size="md"/>}
+      </div>
+      <Tabs tabs={[{id:"content",label:"Content",icon:"ti-book"},{id:"assessment",label:"Assessment",icon:"ti-clipboard-check"}]} active={moduleTab} onChange={setModuleTab}/>
+      {moduleTab==="content"&&<div>
+        {activeModule.content.map((section,i)=><Card key={i} style={{marginBottom:12}}>
+          <p style={{fontWeight:600,fontSize:14,margin:"0 0 8px",color:"var(--cyera)"}}>{section.heading}</p>
+          <p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.7,margin:0}}>{section.body}</p>
+        </Card>)}
+        <button className="primary" onClick={()=>setModuleTab("assessment")} style={{fontSize:13,marginTop:4}}>Continue to Assessment <i className="ti ti-arrow-right"/></button>
+      </div>}
+      {moduleTab==="assessment"&&<div>
+        <Card style={{marginBottom:"1rem",background:"var(--bg2)"}}>
+          <p style={{fontWeight:600,fontSize:13,margin:"0 0 8px",color:"var(--amber)"}}>
+            <i className="ti ti-map" style={{marginRight:6}}/>Scenario
+          </p>
+          <p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.7,margin:"0 0 12px",whiteSpace:"pre-line"}}>{activeModule.scenario.setup}</p>
+          <div style={{background:"var(--card)",border:"1px solid var(--bdr)",borderRadius:"var(--r-md)",padding:"12px"}}>
+            <p style={{fontWeight:600,fontSize:12,color:"var(--txt1)",margin:"0 0 6px"}}>Your Task:</p>
+            <p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.7,margin:0}}>{activeModule.scenario.task}</p>
+          </div>
+        </Card>
+        <Card style={{marginBottom:"1rem"}}>
+          <p style={{fontWeight:600,fontSize:13,margin:"0 0 4px"}}>Evaluation Rubric</p>
+          {activeModule.scenario.rubric.map((r,i)=><div key={i} style={{display:"flex",gap:12,padding:"6px 0",borderBottom:i<activeModule.scenario.rubric.length-1?"1px solid var(--bdr)":"none",alignItems:"flex-start"}}>
+            <div style={{fontWeight:700,color:"var(--cyera)",fontSize:13,minWidth:24}}>{r.max}</div>
+            <div><p style={{fontWeight:500,fontSize:13,margin:"0 0 1px"}}>{r.dimension}</p><p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{r.description}</p></div>
+          </div>)}
+        </Card>
+        {!evaluation&&<div>
+          <label>Your Response</label>
+          <textarea value={response} onChange={e=>setResponse(e.target.value)} placeholder="Write your complete response here. Aim for 200-400 words." style={{minHeight:200,marginBottom:"1rem",fontSize:13,lineHeight:1.7}}/>
+          <ErrBox msg={err}/>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <button className="primary" onClick={submitAssessment} disabled={evaluating||response.trim().length<50}>
+              {evaluating?<><Spinner/>Evaluating your response...</>:<><i className="ti ti-sparkles" style={{marginRight:6}}/>Submit for AI Evaluation</>}
+            </button>
+            <span style={{fontSize:11,color:"var(--txt3)"}}>{response.length} characters</span>
+          </div>
+        </div>}
+        {evaluation&&<div className="fade-in">
+          <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:"1.5rem",padding:"1rem",background:evaluation.passed?"var(--gbg)":"var(--rbg)",border:`1px solid ${evaluation.passed?"var(--gbdr)":"var(--rbdr)"}`,borderRadius:"var(--r-lg)"}}>
+            <ProgressRing score={evaluation.total_score} size={72} stroke={6}/>
+            <div>
+              <p style={{fontWeight:700,fontSize:18,margin:"0 0 4px",color:evaluation.passed?"var(--green)":"var(--red)"}}>{evaluation.passed?"Assessment Passed":"Assessment — Retry Needed"}</p>
+              <p style={{fontSize:13,color:"var(--txt2)",margin:"0 0 4px"}}>Score: {evaluation.total_score}/100 · Passing: {activeModule.passingScore}/100</p>
+              <p style={{fontSize:13,lineHeight:1.6,margin:0}}>{evaluation.overall_feedback}</p>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:"1rem"}}>
+            <Card style={{borderLeft:"3px solid var(--green)"}}><p style={{fontWeight:600,fontSize:12,color:"var(--green)",margin:"0 0 4px"}}>Top Strength</p><p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{evaluation.top_strength}</p></Card>
+            <Card style={{borderLeft:"3px solid var(--amber)"}}><p style={{fontWeight:600,fontSize:12,color:"var(--amber)",margin:"0 0 4px"}}>Top Improvement Area</p><p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{evaluation.top_improvement}</p></Card>
+          </div>
+          <Card style={{marginBottom:"1rem"}}>
+            <p style={{fontWeight:600,fontSize:13,margin:"0 0 10px"}}>Dimension Scores</p>
+            {evaluation.dimension_scores?.map((d,i)=><div key={i} style={{marginBottom:12}}>
+              <ScoreBar score={d.score} max={d.max} label={`${d.dimension} (${d.score}/${d.max})`}/>
+              <p style={{fontSize:12,color:"var(--txt2)",margin:"4px 0 0",lineHeight:1.5}}>{d.feedback}</p>
+            </div>)}
+          </Card>
+          <div style={{display:"flex",gap:8}}>
+            {!evaluation.passed&&<button className="primary" onClick={()=>{setEvaluation(null);setResponse("");}} style={{fontSize:13}}>Retry Assessment</button>}
+            <button onClick={()=>{setActiveModule(null);setEvaluation(null);setResponse("");}} style={{fontSize:13}}>Back to Modules</button>
+          </div>
+        </div>}
+      </div>}
+    </div>;
+  }
+
+  return <div className="fade-in">
+    <SectionHead title="Training Center" subtitle="Five modules covering the enterprise selling motion"/>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:"1.5rem"}}>
+      {MODULES.map(m=>{
+        const score=rep.moduleScores[m.id];
+        const attempts=rep.moduleAttempts[m.id];
+        const passed=score!==null&&score>=m.passingScore;
+        return <Card key={m.id}>
+          <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:10}}>
+            <div style={{width:40,height:40,borderRadius:"var(--r-md)",background:passed?"var(--gbg)":score?"var(--rbg)":"var(--bg2)",border:`1px solid ${passed?"var(--gbdr)":score?"var(--rbdr)":"var(--bdr)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <i className={`ti ${m.icon}`} style={{fontSize:20,color:passed?"var(--green)":score?"var(--red)":"var(--txt3)"}}/>
+            </div>
+            <div style={{flex:1}}>
+              <p style={{fontWeight:600,fontSize:13,margin:"0 0 2px"}}>{m.title}</p>
+              <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{m.duration} · Pass: {m.passingScore}%</p>
+            </div>
+            {score!==null&&<div style={{textAlign:"right"}}><p style={{fontSize:16,fontWeight:700,margin:0,color:passed?"var(--green)":"var(--red)"}}>{score}</p><p style={{fontSize:10,color:"var(--txt2)",margin:0}}>/100</p></div>}
+          </div>
+          <p style={{fontSize:12,color:"var(--txt2)",lineHeight:1.5,margin:"0 0 12px"}}>{m.description}</p>
+          {score!==null&&<ScoreBar score={score} max={100}/>}
+          <div style={{display:"flex",gap:6,alignItems:"center",marginTop:8}}>
+            {passed?<Badge label="✓ Passed" color="green"/>:score?<Badge label="Retry needed" color="red"/>:<Badge label="Not started" color="gray"/>}
+            {attempts>0&&<span style={{fontSize:11,color:"var(--txt3)"}}>{attempts} attempt{attempts>1?"s":""}</span>}
+            <button className={passed?"":"primary"} onClick={()=>{setActiveModule(m);setResponse("");setEvaluation(null);setModuleTab("content");}} style={{marginLeft:"auto",fontSize:12,padding:"5px 12px"}}>
+              {passed?"Review":"Start"} ↗
+            </button>
+          </div>
+        </Card>;
+      })}
+    </div>
+    {Object.values(rep.moduleScores).filter(s=>s!==null&&s>=70).length>=5&&<Card style={{borderLeft:"3px solid var(--purple)",background:"var(--pbg)"}}>
+      <div style={{display:"flex",gap:12,alignItems:"center"}}>
+        <i className="ti ti-star" style={{fontSize:24,color:"var(--purple)",flexShrink:0}}/>
+        <div style={{flex:1}}>
+          <p style={{fontWeight:600,fontSize:14,margin:"0 0 2px",color:"var(--purple)"}}>Advanced Module Unlocked — Executive CISO Business Case</p>
+          <p style={{fontSize:12,color:"var(--txt2)",margin:0}}>All five core modules passed. Complete the advanced written scenario to demonstrate board-level data security selling readiness.</p>
+        </div>
+        <button className="primary" style={{fontSize:12,flexShrink:0,background:"var(--purple)",borderColor:"var(--purple)"}}>Start ↗</button>
+      </div>
+    </Card>}
+  </div>;
+}
+
+/* ── PRESENTATION LAB ──────────────────────────────────────────── */
+function PresentationLab({rep,onScoreUpdate}){
+  const [phase,setPhase]=useState("briefing");
+  const [countdown,setCountdown]=useState(30);
+  const [elapsed,setElapsed]=useState(0);
+  const [transcript,setTranscript]=useState("");
+  const [liveTranscript,setLiveTranscript]=useState("");
+  const [evaluation,setEvaluation]=useState(null);
+  const [err,setErr]=useState("");
+  const [stream,setStream]=useState(null);
+  const [hasCamera,setHasCamera]=useState(false);
+  const videoRef=useRef(null);
+  const recognitionRef=useRef(null);
+  const timerRef=useRef(null);
+  const timerElapsedRef=useRef(null);
+  const transcriptRef=useRef("");
+  const MAX_SECONDS=15*60;
+  const attemptNum=rep.presentationScores.length+1;
+  const prevScores=rep.presentationScores;
+
+  useEffect(()=>{return()=>{cleanup();};},[]);
+
+  function cleanup(){
+    if(stream)stream.getTracks().forEach(t=>t.stop());
+    if(recognitionRef.current)try{recognitionRef.current.stop();}catch(e){}
+    clearInterval(timerRef.current);clearInterval(timerElapsedRef.current);
+  }
+
+  async function startCamera(){
+    try{const s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});setStream(s);setHasCamera(true);if(videoRef.current){videoRef.current.srcObject=s;videoRef.current.muted=true;}}
+    catch(e){setHasCamera(false);setErr("Camera access denied. Use the written submission option below.");}
+  }
+
+  function startCountdown(){
+    startCamera();setPhase("countdown");setCountdown(30);
+    let c=30;
+    timerRef.current=setInterval(()=>{c--;setCountdown(c);if(c<=0){clearInterval(timerRef.current);startRecording();}},1000);
+  }
+
+  function startRecording(){
+    setPhase("recording");setElapsed(0);transcriptRef.current="";setLiveTranscript("");
+    timerElapsedRef.current=setInterval(()=>{setElapsed(prev=>{if(prev>=MAX_SECONDS-1){stopRecording();return MAX_SECONDS;}return prev+1;});},1000);
+    if("webkitSpeechRecognition" in window||"SpeechRecognition" in window){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      const rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang="en-US";
+      rec.onresult=e=>{let interim="",final="";for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){final+=e.results[i][0].transcript+" ";}else{interim+=e.results[i][0].transcript;}}if(final){transcriptRef.current+=final;}setLiveTranscript(transcriptRef.current+interim);};
+      rec.onerror=()=>{};rec.start();recognitionRef.current=rec;
+    }
+  }
+
+  function stopRecording(){
+    clearInterval(timerElapsedRef.current);
+    if(recognitionRef.current)try{recognitionRef.current.stop();}catch(e){}
+    if(stream)stream.getTracks().forEach(t=>t.stop());
+    const finalTranscript=transcriptRef.current||liveTranscript;
+    setTranscript(finalTranscript);setPhase("processing");
+    evaluateAndScore(finalTranscript);
+  }
+
+  async function evaluateAndScore(text){
+    setErr("");
+    try{const toEval=text.trim().length>50?text:"[Written submission]: "+text;const result=await evaluatePresentation(toEval);setEvaluation(result);onScoreUpdate(result.total_score);setPhase("results");}
+    catch(e){setErr(e.message);setPhase("briefing");}
+  }
+
+  function submitWritten(){
+    if(transcript.trim().length<100){setErr("Please write at least 100 words.");return;}
+    setPhase("processing");evaluateAndScore("[Written submission]: "+transcript);
+  }
+
+  const formatTime=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+
+  if(phase==="results"&&evaluation){
+    return <div className="fade-in">
+      <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:"1.5rem"}}>
+        <button onClick={()=>{setPhase("briefing");setEvaluation(null);setTranscript("");setLiveTranscript("");setElapsed(0);}} style={{fontSize:12}}><i className="ti ti-arrow-left" style={{marginRight:4}}/>Back</button>
+        <p style={{fontWeight:600,fontSize:16,margin:0}}>Presentation Lab — Attempt {attemptNum} Results</p>
+      </div>
+      <div style={{display:"flex",gap:16,alignItems:"flex-start",marginBottom:"1.5rem",padding:"1.25rem",background:evaluation.passed?"var(--gbg)":"var(--rbg)",border:`1px solid ${evaluation.passed?"var(--gbdr)":"var(--rbdr)"}`,borderRadius:"var(--r-lg)"}}>
+        <ProgressRing score={evaluation.total_score} size={88} stroke={7}/>
+        <div>
+          <p style={{fontWeight:700,fontSize:20,margin:"0 0 4px",color:evaluation.passed?"var(--green)":"var(--red)"}}>{evaluation.passed?"Presentation Passed":"Presentation Needs Development"}</p>
+          <p style={{fontSize:13,color:"var(--txt2)",margin:"0 0 8px"}}>Score: {evaluation.total_score}/100 · Passing: 70/100 · Attempt {attemptNum} of 3</p>
+          <p style={{fontSize:13,lineHeight:1.6,margin:0}}>{evaluation.overall_feedback}</p>
+        </div>
+      </div>
+      {prevScores.length>0&&<Card style={{marginBottom:"1rem"}}>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 8px"}}>Score Trajectory</p>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {[...prevScores,evaluation.total_score].map((s,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
+            {i>0&&<i className="ti ti-arrow-right" style={{fontSize:12,color:"var(--txt3)"}}/>}
+            <div style={{textAlign:"center"}}><p style={{fontSize:18,fontWeight:700,margin:0,color:s>=75?"var(--green)":s>=60?"var(--amber)":"var(--red)"}}>{s}</p><p style={{fontSize:10,color:"var(--txt2)",margin:0}}>Attempt {i+1}</p></div>
+          </div>)}
+        </div>
+      </Card>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:"1rem"}}>
+        <Card style={{borderLeft:"3px solid var(--green)"}}><p style={{fontWeight:600,fontSize:12,color:"var(--green)",margin:"0 0 6px"}}>Top Strength</p><p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{evaluation.top_strength}</p></Card>
+        <Card style={{borderLeft:"3px solid var(--amber)"}}><p style={{fontWeight:600,fontSize:12,color:"var(--amber)",margin:"0 0 6px"}}>Top Improvement Area</p><p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{evaluation.top_improvement}</p></Card>
+      </div>
+      <Card style={{marginBottom:"1rem"}}>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 12px"}}>Rubric Breakdown</p>
+        {evaluation.dimension_scores?.map((d,i)=><div key={i} style={{marginBottom:14}}>
+          <ScoreBar score={d.score} max={d.max} label={`${d.dimension} — ${d.score}/${d.max}`}/>
+          <p style={{fontSize:12,color:"var(--txt2)",lineHeight:1.5,margin:"4px 0 0"}}>{d.feedback}</p>
+        </div>)}
+      </Card>
+      {(evaluation.coaching_priorities||[]).length>0&&<Card style={{marginBottom:"1rem",borderLeft:"3px solid var(--purple)"}}>
+        <p style={{fontWeight:600,fontSize:13,color:"var(--purple)",margin:"0 0 10px"}}>Coaching Priorities for Manager</p>
+        {evaluation.coaching_priorities.map((p,i)=><div key={i} style={{padding:"8px",background:"var(--bg2)",borderRadius:"var(--r-sm)",marginBottom:6}}>
+          <p style={{fontWeight:500,fontSize:12,margin:"0 0 2px"}}>{i+1}. {p.priority}</p>
+          <p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{p.action}</p>
+        </div>)}
+      </Card>}
+      {attemptNum<3&&<button className="primary" onClick={()=>{setPhase("briefing");setEvaluation(null);setTranscript("");setLiveTranscript("");setElapsed(0);}} style={{fontSize:13}}>
+        {evaluation.passed?"Review Again":"Retry — Attempt "+(attemptNum+1)+" of 3"}
+      </button>}
+    </div>;
+  }
+
+  if(phase==="processing"){
+    return <div style={{textAlign:"center",padding:"4rem 2rem"}}>
+      <div style={{width:64,height:64,borderRadius:"50%",background:"var(--glow)",border:"2px solid var(--cyera)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 1.5rem"}}>
+        <i className="ti ti-sparkles" style={{fontSize:28,color:"var(--cyera)"}}/>
+      </div>
+      <p style={{fontSize:18,fontWeight:600,marginBottom:8}}>Evaluating Your Presentation</p>
+      <p style={{fontSize:13,color:"var(--txt2)",marginBottom:"1.5rem"}}>Claude is scoring your response across all five rubric dimensions...</p>
+      <Spinner size={20}/>
+      <ErrBox msg={err}/>
+    </div>;
+  }
+
+  if(phase==="countdown"){
+    return <div style={{textAlign:"center",padding:"3rem 2rem"}}>
+      <p style={{fontSize:14,color:"var(--txt2)",marginBottom:"1rem"}}>Prepare yourself. Recording starts in...</p>
+      <div style={{width:120,height:120,borderRadius:"50%",background:"var(--glow)",border:`4px solid var(--cyera)`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 1.5rem"}}>
+        <p style={{fontSize:52,fontWeight:700,margin:0,color:"var(--cyera)"}}>{countdown}</p>
+      </div>
+      <p style={{fontSize:13,color:"var(--txt2)"}}>Lead with a specific business insight about Vertex's PCI DSS 4.0 deadline — not a product pitch</p>
+    </div>;
+  }
+
+  if(phase==="recording"){
+    return <div style={{maxWidth:700,margin:"0 auto"}}>
+      <div style={{display:"flex",gap:8,alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <div style={{width:10,height:10,borderRadius:"50%",background:"var(--red)",animation:"pulse 1s ease-in-out infinite"}}/>
+          <span style={{fontSize:13,fontWeight:600,color:"var(--red)"}}>RECORDING</span>
+        </div>
+        <span style={{fontSize:16,fontWeight:700,fontFamily:"monospace"}}>{formatTime(elapsed)} / {formatTime(MAX_SECONDS)}</span>
+        <button onClick={stopRecording} className="danger" style={{fontSize:12}}><i className="ti ti-square" style={{marginRight:4}}/>Stop Recording</button>
+      </div>
+      <div style={{position:"relative",borderRadius:"var(--r-lg)",overflow:"hidden",background:"#000",aspectRatio:"16/9",marginBottom:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        {hasCamera?<video ref={videoRef} autoPlay style={{width:"100%",height:"100%",objectFit:"cover"}} muted/>:
+        <div style={{textAlign:"center",color:"var(--txt2)"}}>
+          <i className="ti ti-microphone" style={{fontSize:48,display:"block",marginBottom:8,color:"var(--cyera)"}}/>
+          <p style={{fontSize:13}}>Audio only — no camera detected</p>
+        </div>}
+        <div style={{position:"absolute",top:12,right:12,background:"rgba(0,0,0,0.7)",borderRadius:"var(--r-sm)",padding:"4px 10px",fontSize:11,color:"#fff",display:"flex",alignItems:"center",gap:6}}>
+          <i className="ti ti-microphone" style={{color:"var(--red)"}}/>Listening
+        </div>
+      </div>
+      <Card style={{maxHeight:160,overflow:"auto"}}>
+        <p style={{fontSize:10,fontWeight:600,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:"0.6px",margin:"0 0 6px"}}>Live Transcript</p>
+        <p style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,margin:0}}>{liveTranscript||"Start speaking — your words will appear here..."}</p>
+      </Card>
+    </div>;
+  }
+
+  return <div className="fade-in">
+    <SectionHead title="Presentation Lab" subtitle={`Attempt ${attemptNum} of 3 — ${PRESENTATION_SCENARIO.title}`}/>
+    {prevScores.length>0&&<Card style={{marginBottom:"1rem",background:"var(--bg2)"}}>
+      <p style={{fontSize:12,fontWeight:600,color:"var(--txt2)",margin:"0 0 6px"}}>Previous Scores</p>
+      <div style={{display:"flex",gap:10}}>
+        {prevScores.map((s,i)=><div key={i} style={{textAlign:"center"}}>
+          <p style={{fontSize:18,fontWeight:700,margin:0,color:s>=75?"var(--green)":s>=60?"var(--amber)":"var(--red)"}}>{s}</p>
+          <p style={{fontSize:10,color:"var(--txt2)",margin:0}}>Attempt {i+1}</p>
+        </div>)}
+      </div>
+    </Card>}
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:"1.5rem"}}>
+      <Card style={{background:"var(--bg2)"}}>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 10px",color:"var(--cyera)"}}>
+          <i className="ti ti-building" style={{marginRight:6}}/>Account Brief
+        </p>
+        {Object.entries(PRESENTATION_SCENARIO.account).map(([k,v])=><div key={k} style={{marginBottom:6}}>
+          <span style={{fontSize:11,color:"var(--txt3)",textTransform:"capitalize"}}>{k.replace("_"," ")}: </span>
+          <span style={{fontSize:12,color:"var(--txt2)"}}>{v}</span>
+        </div>)}
+      </Card>
+      <Card style={{background:"var(--bg2)"}}>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 10px",color:"var(--amber)"}}>
+          <i className="ti ti-target" style={{marginRight:6}}/>Your Objectives
+        </p>
+        {PRESENTATION_SCENARIO.objectives.map((o,i)=><div key={i} style={{display:"flex",gap:6,marginBottom:5}}>
+          <span style={{color:"var(--amber)",fontWeight:700,flexShrink:0}}>{i+1}.</span>
+          <span style={{fontSize:12,color:"var(--txt2)"}}>{o}</span>
+        </div>)}
+      </Card>
+    </div>
+    <Card style={{marginBottom:"1rem",borderLeft:"3px solid var(--amber)"}}>
+      <p style={{fontWeight:600,fontSize:13,margin:"0 0 8px",color:"var(--amber)"}}>Scenario Setup</p>
+      <p style={{fontSize:13,color:"var(--txt2)",lineHeight:1.7,margin:0}}>{PRESENTATION_SCENARIO.setup}</p>
+    </Card>
+    <Card style={{marginBottom:"1.5rem"}}>
+      <p style={{fontWeight:600,fontSize:13,margin:"0 0 10px"}}>Evaluation Rubric — 5 dimensions, 20 points each</p>
+      {PRESENTATION_SCENARIO.rubric.map((r,i)=><div key={i} style={{display:"flex",gap:10,padding:"6px 0",borderBottom:i<PRESENTATION_SCENARIO.rubric.length-1?"1px solid var(--bdr)":"none"}}>
+        <span style={{fontWeight:700,color:"var(--cyera)",fontSize:13,minWidth:24}}>20</span>
+        <div><p style={{fontWeight:500,fontSize:13,margin:"0 0 1px"}}>{r.dimension}</p><p style={{fontSize:11,color:"var(--txt2)",margin:0}}>{r.description}</p></div>
+      </div>)}
+    </Card>
+    <ErrBox msg={err}/>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+      <div>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 8px"}}>Option A — Live Recording</p>
+        <p style={{fontSize:12,color:"var(--txt2)",margin:"0 0 12px"}}>Record with your camera and microphone. 30 seconds to prepare, then 15 minutes to present. Speech is transcribed live and evaluated by Claude.</p>
+        <button className="primary" onClick={startCountdown} style={{fontSize:13,width:"100%"}}>
+          <i className="ti ti-video" style={{marginRight:6}}/>Start Recording Session
+        </button>
+      </div>
+      <div>
+        <p style={{fontWeight:600,fontSize:13,margin:"0 0 8px"}}>Option B — Written Submission</p>
+        <p style={{fontSize:12,color:"var(--txt2)",margin:"0 0 8px"}}>Type your complete 15-minute CISO discovery call as if you were speaking it. Evaluated on the same rubric.</p>
+        <textarea value={transcript} onChange={e=>{setTranscript(e.target.value);setErr("");}} placeholder="Write your complete CISO discovery call — opening, discovery questions, objection handling, and close. Aim for 400-600 words." style={{minHeight:100,marginBottom:8,fontSize:12}}/>
+        <button onClick={submitWritten} disabled={transcript.trim().length<100} style={{fontSize:13,width:"100%"}}>
+          <i className="ti ti-clipboard-check" style={{marginRight:6}}/>Submit Written Assessment
+        </button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── MAIN APP ──────────────────────────────────────────────────── */
+function App(){
+  const [role,setRole]=useState("manager");
+  const [activeTab,setActiveTab]=useState("dashboard");
+  const [reps,setReps]=useState(INITIAL_REPS);
+  const [activeRepId,setActiveRepId]=useState("r1");
+  const [selectedRepCard,setSelectedRepCard]=useState(null);
+  const activeRep=reps.find(r=>r.id===activeRepId)||reps[0];
+
+  function updateModuleScore(repId,moduleId,score){
+    setReps(prev=>prev.map(r=>r.id!==repId?r:{...r,moduleScores:{...r.moduleScores,[moduleId]:score},moduleAttempts:{...r.moduleAttempts,[moduleId]:(r.moduleAttempts[moduleId]||0)+1}}));
+  }
+
+  function updatePresentationScore(repId,score){
+    setReps(prev=>prev.map(r=>r.id!==repId?r:{...r,presentationScores:[...r.presentationScores,score]}));
+  }
+
+  const TABS=[
+    {id:"dashboard",label:"Dashboard",icon:"ti-layout-dashboard"},
+    {id:"plan",label:"30/60/90 Plan",icon:"ti-calendar"},
+    {id:"training",label:"Training Center",icon:"ti-school"},
+    {id:"presentation",label:"Presentation Lab",icon:"ti-video"},
+  ];
+
+  return <ApiKeyGate>
+    <div style={{minHeight:"100vh",background:"var(--bg)"}}>
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(9,9,14,0.96)",borderBottom:"1px solid var(--bdr)",backdropFilter:"blur(12px)"}}>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"0 2rem",display:"flex",alignItems:"center",gap:0,height:52}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginRight:32,flexShrink:0}}>
+            <div style={{width:30,height:30,background:"linear-gradient(135deg,var(--cyera),var(--purple))",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <i className="ti ti-shield-lock" style={{color:"#fff",fontSize:15}}/>
+            </div>
+            <div>
+              <p style={{fontWeight:700,fontSize:14,margin:0,letterSpacing:"-0.3px"}}>ARIA</p>
+              <p style={{fontSize:9,color:"var(--txt3)",margin:0}}>Accelerated Rep Intelligence Agent</p>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:2,flex:1}}>
+            {TABS.map(t=><button key={t.id} onClick={()=>setActiveTab(t.id)} style={{fontSize:13,padding:"6px 14px",borderRadius:"var(--r-sm)",background:activeTab===t.id?"var(--bg2)":"transparent",border:activeTab===t.id?"1px solid var(--bdr)":"1px solid transparent",fontWeight:activeTab===t.id?600:400,color:activeTab===t.id?"var(--txt1)":"var(--txt2)",display:"flex",alignItems:"center",gap:6}}>
+              <i className={`ti ${t.icon}`} style={{fontSize:14}}/>{t.label}
+            </button>)}
+          </div>
+          <div style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
+            <select value={activeRepId} onChange={e=>setActiveRepId(e.target.value)} style={{width:160,fontSize:12,padding:"5px 8px"}}>
+              {reps.map(r=><option key={r.id} value={r.id}>{r.name} — {r.role}</option>)}
+            </select>
+            <RoleToggle role={role} setRole={v=>{setRole(v);setActiveTab("dashboard");}}/>
+          </div>
+        </div>
+      </div>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"2rem"}}>
+        {activeTab==="dashboard"&&(role==="manager"?
+          <ManagerDashboard reps={reps} onSelectRep={setSelectedRepCard} selectedRep={selectedRepCard} onNav={setActiveTab}/>:
+          <RepDashboard rep={activeRep} onNav={setActiveTab}/>)}
+        {activeTab==="plan"&&<PlanView rep={activeRep} role={role}/>}
+        {activeTab==="training"&&<TrainingCenter rep={activeRep} role={role} onScoreUpdate={(moduleId,score)=>updateModuleScore(activeRep.id,moduleId,score)}/>}
+        {activeTab==="presentation"&&<PresentationLab rep={activeRep} onScoreUpdate={score=>updatePresentationScore(activeRep.id,score)}/>}
+      </div>
+    </div>
+  </ApiKeyGate>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
